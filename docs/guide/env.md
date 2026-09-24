@@ -8,10 +8,10 @@ opencode / multica 通过环境变量知道项目代码在哪，以及一些凭�
 
 ```bash
 # 路径（项目代码位置）
-export VIEW_CODE_PATH="/opt/view_code"
+export VIEW_CODE_PATH="/opt/tk"
 export AI_ASSET_PATH="/opt/ai_asset"
 export AIR_PLATFORM_PATH="/opt/air_platform"
-export VIEW_SQL_PATH="/opt/view_code_sql"
+export VIEW_SQL_PATH="/opt/tk_sql"
 export AUTO_TESTING_PATH="/opt/auto_testing"
 
 # Git

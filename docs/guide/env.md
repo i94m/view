@@ -25,8 +25,6 @@ export VIEW_PASSWORD="your-test-password"
 
 # multica
 export MULTICA_SERVER_URL="http://172.66.30.237:8023"
-
-# 模型密钥按需添加，供 opencode.json 用 {env:XXX} 引用
 ```
 
 ## Windows

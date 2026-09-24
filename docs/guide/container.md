@@ -17,8 +17,6 @@ VIEW_PASSWORD=your-test-password
 
 # multica
 MULTICA_SERVER_URL=http://172.66.30.237:8023
-
-# 模型密钥由使用者自行添加，供 opencode.json 用 {env:XXX} 引用
 ```
 
 变量含义见 [配置环境变量](/guide/env)。

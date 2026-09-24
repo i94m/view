@@ -7,7 +7,9 @@ hero:
   actions:
     - theme: brand
       text: 访问站点
-      link: /
+      # VitePress 只给以 / 开头的站内链接拼接 base（'/' => '/docs/'）。
+      # 用相对上一级绕开，从首页 /docs/ 解析到站点根 /
+      link: ../
     - theme: alt
       text: 创建 Runtime
       link: /guide/host-install

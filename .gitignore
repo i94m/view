@@ -1,0 +1,23 @@
+# ---- 密钥 / 本地配置（.env.example 是模板，需提交）----
+.env
+.env.*
+!.env.example
+
+# ---- 运行时状态 / 挂载源（含登录 token、任务数据，勿提交）----
+multica/
+workspace/
+opencode/
+sites/
+view_sql/
+
+# ---- 构建产物 / 日志 ----
+*.log
+.playwright-mcp/
+
+# ---- 验证 / 临时产物 ----
+pw-mcp-verify.png
+
+# ---- OS / 编辑器 ----
+.DS_Store
+.idea/
+.vscode/

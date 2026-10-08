@@ -16,7 +16,7 @@ VIEW_USERNAME=you@rayootech.com
 VIEW_PASSWORD=your-test-password
 
 # multica
-MULTICA_SERVER_URL=http://172.66.30.237:8023
+MULTICA_SERVER_URL=http://172.66.30.237:3456
 ```
 
 变量含义见 [配置环境变量](/guide/env)。
@@ -77,7 +77,7 @@ apache 监听容器内 80，映射到宿主 8080：`http://127.0.0.1:8080`。
 
 ```bash
 docker compose exec -it runtime multica setup self-host \
-  --server-url http://172.66.30.237:8023 \
+  --server-url http://172.66.30.237:3456 \
   --app-url    http://172.66.30.237:3456
 docker compose exec runtime multica daemon status
 ```

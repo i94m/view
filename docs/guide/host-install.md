@@ -20,7 +20,7 @@ iwr http://172.66.30.237:8008/multica/install.ps1 | iex
 
 ```bash
 multica setup self-host \
-  --server-url http://172.66.30.237:8023 \
+  --server-url http://172.66.30.237:3456 \
   --app-url    http://172.66.30.237:3456
 ```
 

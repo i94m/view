@@ -24,7 +24,7 @@ export VIEW_USERNAME="you@rayootech.com"
 export VIEW_PASSWORD="your-test-password"
 
 # multica
-export MULTICA_SERVER_URL="http://172.66.30.237:3456"
+export MULTICA_SERVER_URL="http://210.74.156.242:3456"
 ```
 
 ## Windows
@@ -49,7 +49,7 @@ setx VIEW_USERNAME "you@rayootech.com"
 setx VIEW_PASSWORD "your-test-password"
 
 # multica
-setx MULTICA_SERVER_URL "http://172.66.30.237:3456"
+setx MULTICA_SERVER_URL "http://210.74.156.242:3456"
 ```
 
 也可以在「系统属性 → 环境变量」里手动添加。

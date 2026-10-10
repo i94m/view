@@ -7,21 +7,21 @@
 macOS / Linux：
 
 ```bash
-curl -fsSL http://172.66.30.237:8008/multica/install.sh | bash
+curl -fsSL http://210.74.156.242:8008/multica/install.sh | bash
 ```
 
 Windows PowerShell：
 
 ```powershell
-iwr http://172.66.30.237:8008/multica/install.ps1 | iex
+iwr http://210.74.156.242:8008/multica/install.ps1 | iex
 ```
 
 ## 2. 连接执行电脑
 
 ```bash
 multica setup self-host \
-  --server-url http://172.66.30.237:3456 \
-  --app-url    http://172.66.30.237:3456
+  --server-url http://210.74.156.242:3456 \
+  --app-url    http://210.74.156.242:3456
 ```
 
 ## 3. 确认连接状态

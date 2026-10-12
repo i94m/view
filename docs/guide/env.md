@@ -1,6 +1,7 @@
 # 配置环境变量
 
-opencode / multica 通过环境变量知道项目代码在哪，以及一些凭据。按系统设置：
+不同 runtime（机器 / 容器）上代码仓库的路径可能各不相同。为了让 opencode / multica 在任意环境下
+都能以**统一**的方式定位代码、读取凭据，把这些信息统一放进环境变量。按系统设置：
 
 ## macOS / WSL
 
@@ -11,7 +12,7 @@ opencode / multica 通过环境变量知道项目代码在哪，以及一些凭�
 export VIEW_CODE_PATH="/opt/tk"
 export AI_ASSET_PATH="/opt/ai_asset"
 export AIR_PLATFORM_PATH="/opt/air_platform"
-export VIEW_SQL_PATH="/opt/view_sql"
+export VIEW_SQL_PATH="/opt/db_change_scripts"
 export AUTO_TESTING_PATH="/opt/auto_testing"
 
 # Git
@@ -26,6 +27,15 @@ export VIEW_PASSWORD="your-test-password"
 # multica
 export MULTICA_SERVER_URL="http://210.74.156.242:3456"
 ```
+
+验证（以 `GIT_USERNAME` 为例）：
+
+```bash
+echo "$GIT_USERNAME"
+```
+
+能打印出用户名即配置成功；输出为空说明没生效，检查变量名拼写，并 `source ~/.zshrc`（或 `~/.bashrc`）
+或重开终端。
 
 ## Windows
 
@@ -54,6 +64,15 @@ setx MULTICA_SERVER_URL "http://210.74.156.242:3456"
 
 也可以在「系统属性 → 环境变量」里手动添加。
 
+验证（以 `GIT_USERNAME` 为例）：
+
+```powershell
+echo $env:GIT_USERNAME
+```
+
+能打印出用户名即配置成功；输出为空说明没生效，检查变量名拼写，并**重开终端**（`setx` 写入的变量需
+重开终端才生效）。
+
 ## 变量说明
 
 | 变量 | 说明 |
@@ -69,10 +88,10 @@ setx MULTICA_SERVER_URL "http://210.74.156.242:3456"
 | `MULTICA_SERVER_URL` | multica server 地址 |
 
 > 容器里，路径变量由 docker-compose 的 `environment` 设为容器内路径，其余变量由 `.env`
-> 注入（见[容器运行](/guide/container)）。Playwright MCP 与 Database MCP 的配置不在环境变量里。
+> 注入（见[安装 Multica](/guide/host-install)）。浏览器 MCP / 数据库 MCP 的配置不在环境变量里。
 
 ## 相关
 
-- [容器运行](/guide/container)
-- [安装 Multica Cli](/guide/host-install)
+- [安装 Multica](/guide/host-install)
+- [安装 Multica](/guide/host-install)
 - [OpenCode 配置](/guide/opencode)

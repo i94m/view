@@ -20,21 +20,21 @@ export default defineConfig({
     sidebar: {
       '/guide/': [
         {
-          text: '运行 multica',
+          text: 'Multica',
           items: [
             { text: '配置环境变量', link: '/guide/env' },
-            { text: '安装 Multica Cli', link: '/guide/host-install' },
+            { text: '安装 Multica', link: '/guide/host-install' },
+            { text: '添加 Runtime', link: '/guide/multica-setup' },
           ],
         },
         {
           text: 'OpenCode',
           items: [
-            { text: '安装OpenCode', link: '/guide/opencode' },
-            { text: 'Playwright MCP', link: '/guide/mcp-playwright' },
-            { text: 'Database MCP', link: '/guide/mcp-database' },
+            { text: '安装和配置', link: '/guide/opencode' },
+            { text: '浏览器 MCP', link: '/guide/mcp-playwright' },
+            { text: '数据库 MCP', link: '/guide/mcp-database' },
           ],
         },
-        { text: '容器运行', link: '/guide/container' },
       ],
       '/appendix/': [
         {

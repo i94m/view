@@ -7,7 +7,7 @@ opencode、openspec、uv（Python）与 MySQL MCP，用于在本地/服务器上
 ## 架构
 
 ```
-docker compose (project: multica，bridge 网络 multica_net，默认子网 172.31.250.0/24)
+docker compose (project: multica，bridge 网络 multica_net，默认子网 172.16.10.0/24)
 └── runtime        view:php8.4-multica-runtime
     ├── apache / php-fpm (EXPOSE 80，映射到宿主 8080:80)
     ├── multica daemon (entrypoint 自启动)
@@ -61,30 +61,33 @@ pnpm preview    # 预览构建产物
 
 - Docker + Docker Compose v2
 - 已构建/可拉取的 `registry.cn-hangzhou.aliyuncs.com/tke-view/view:php8.4-multica-runtime` 镜像
-- 可访问 TKE 内网 Git、DeepSeek API、multica server、MySQL
+- 可访问 TKE 内网 Git、模型 API、multica server、MySQL
+
+> 镜像已内置 **multica 与 opencode**（及 openspec、uv、MySQL MCP），无需在宿主机或容器内另行安装。
 
 ## 快速开始
 
 ```bash
 cp .env.example .env
-# 编辑 .env 填 git 凭据 / DEEPSEEK_API_KEY；在 docker-compose.yml 里填挂载路径
+# 编辑 .env 填 git 凭据；在 docker-compose.yml 里填挂载路径
 docker compose up -d
-docker compose logs -f runtime
+docker logs -f multica-runtime
 ```
 
-镜像**不内置** opencode 配置。容器起来后进容器创建一次
-`/root/.config/opencode/opencode.json`（模型密钥、Playwright、数据库连接都在这里填），
-完整示例见 `docs/guide/opencode.md`：
+镜像**不内置** opencode 的模型配置。**首次运行先给 opencode 配好模型服务**：
 
 ```bash
-docker compose exec runtime bash
-mkdir -p /root/.config/opencode
-vi /root/.config/opencode/opencode.json
+docker exec -it multica-runtime opencode
 ```
+
+在界面里输入 `/connect`，按提示选择模型服务商、填入 API Key，保存后即可使用。
+
+MCP（Playwright / MySQL）等配置写在容器的 `/root/.config/opencode/opencode.json`，
+完整示例见 `docs/guide/opencode.md`。
 
 分享给同事：把仓库复制过去（运行至少需要 `docker-compose.yml` + `.env.example`），
 对方 `cp .env.example .env` 填好后 `docker compose up -d` 即可（镜像已在 registry，无需本地构建），
-再按文档创建一次 `opencode.json`。
+再首次 `/connect` 配置模型、按文档创建一次 `opencode.json`。
 
 Web 入口：apache 监听容器内 **80**，compose 映射到宿主 **8080**（`http://127.0.0.1:8080`）。
 
@@ -95,7 +98,6 @@ Web 入口：apache 监听容器内 **80**，compose 映射到宿主 **8080**（
 | `GIT_EMAIL` / `GIT_USERNAME` / `GIT_PASSWORD` | git 身份与凭据；密码含 `@ : / %` 需 URL 编码，建议用 access token。entrypoint 会写入 `~/.git-credentials` |
 | `GIT_VIEW_CODE` | 用于推导 git host（`entrypoint-multica.sh`），缺省回退 `git.ap.tkelevator.com` |
 | `GIT_AI_ASSET` | 保留项，当前无脚本读取 |
-| `DEEPSEEK_API_KEY` | opencode 模型密钥（`opencode.json` 中用 `{env:DEEPSEEK_API_KEY}` 读取） |
 | （登录） | 登录态存于 `./multica/config.json`（挂载持久化），首次进容器 `multica login --token mul_xxx` |
 | `VIEW_USERNAME` / `VIEW_PASSWORD` | Playwright 登录凭据（`login.ts` 读取） |
 | `MULTICA_SERVER_URL` | multica server 地址 |
@@ -120,16 +122,16 @@ Web 入口：apache 监听容器内 **80**，compose 映射到宿主 **8080**（
 | `./opencode` | `/root/.local/share/opencode` | opencode 数据 |
 
 > 相对路径（`./multica`、`./opencode` 等）相对于 `docker-compose.yml` 所在处。
-> `opencode.json`（`/root/.config/opencode/`）**不在挂载卷里**，需在容器内自行创建。
 
 ## 常用命令
 
 ```bash
 docker compose up -d                 # 启动
 docker compose down                  # 停止
-docker compose restart runtime       # 重启（改完 opencode.json 后生效）
-docker compose logs -f runtime       # 查看日志
-docker compose exec runtime bash     # 进入容器
+docker restart multica-runtime       # 重启（改完 opencode.json 后生效）
+docker logs -f multica-runtime       # 查看日志
+docker exec -it multica-runtime bash     # 进入容器
+docker exec -it multica-runtime opencode   # 打开 opencode（首次运行 /connect 配置模型）
 docker compose config                # 校验并查看解析后的配置
 ```
 
@@ -180,15 +182,17 @@ docker buildx build --platform linux/arm64 \
 ```
 
 关键构建参数（Dockerfile `ARG`，均可用 `--build-arg` 覆盖）：`NODE_VERSION`、`MULTICA_VERSION`、
-`MYSQL_MCP_VERSION`。opencode（v2，npm 包 `@opencode/cli`）与 openspec 均装最新版本。
+`OPENCODE_VERSION`、`MYSQL_MCP_VERSION`。opencode（v2，npm 包 `@opencode/cli`）与 multica、MySQL MCP
+均按固定版本安装，openspec 装最新版本。
 
 ## 注意事项
 
-- 镜像**不内置** opencode 配置：`/root/.config/opencode/opencode.json` 由使用者在容器内创建
-  （见 `docs/guide/opencode.md`）。该文件不在挂载卷里，容器重建后会丢失，需重新创建。
+- 镜像**不内置** opencode 的模型配置：首次运行先 `docker exec -it multica-runtime opencode`，在界面里
+  用 `/connect` 配置模型服务。MCP 等配置写在 `/root/.config/opencode/opencode.json`
+  （见 `docs/guide/opencode.md`）。
 - **密钥**：`.env` 已被 `.gitignore` 和 `.dockerignore`（`.env*`）忽略，不会进 git 也不进镜像；
   数据库连接参数写在容器内的 `opencode.json` 里，注意不要把含密钥的它提交进仓库。
-  另外 `.env.bk` 只被 `.dockerignore` 忽略，**不在 `.gitignore` 列表**，勿提交。
+  `.env.bak` / `.env.bk` 等 `.env.*` 同样命中 `.gitignore` 的 `.env.*` 规则，不会入库。
 - **网络**：`runtime` 接在 bridge 网络 `multica_net`（子网在 `docker-compose.yml` 里写死）。
   在 macOS Docker Desktop 上，宿主 `ppp0` 的 VPN 路由**不会**进入容器，跨宿主/内网访问用
   `extra_hosts`。

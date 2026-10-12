@@ -1,4 +1,4 @@
-# 配置 Playwright MCP
+# 浏览器 MCP
 
 为 opencode 提供浏览器自动化（打开页面、点击、截图、抓取等），是 multica 任务执行网页
 操作/登录的基础。
@@ -69,4 +69,4 @@ docker run -d -i --rm --init --pull=always \
 ## 相关
 
 - [OpenCode 配置](/guide/opencode)
-- [Database MCP](/guide/mcp-database)
+- [数据库 MCP](/guide/mcp-database)

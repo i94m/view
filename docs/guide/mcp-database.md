@@ -1,4 +1,4 @@
-# 配置 Database MCP
+# 数据库 MCP
 
 为 opencode 提供只读的 MySQL 查询能力，供 multica 任务读取业务数据。
 
@@ -33,4 +33,4 @@
 ## 相关
 
 - [OpenCode 配置](/guide/opencode)
-- [Playwright MCP](/guide/mcp-playwright)
+- [浏览器 MCP](/guide/mcp-playwright)

@@ -2,8 +2,10 @@
 
 ## 配置与密钥
 
-- `/root/.config/opencode/opencode.json` 不随宿主机目录持久化，容器重建后会丢失，需重新创建。
-- `.env` 已被 `.gitignore` / `.dockerignore` 忽略；但 `.env.bk` 只被 `.dockerignore` 忽略，勿提交。
+- 首次运行先 `docker exec -it multica-runtime opencode`，在界面里用 `/connect` 配置模型服务
+  （见[安装 Multica](/guide/host-install)）。
+- `.env` 及 `.env.*`（如 `.env.bak`、`.env.bk`）均被 `.gitignore` / `.dockerignore` 忽略，不会入库；
+  `.env.example`（`!.env.example`）例外，模板需提交。
 - 数据库密码等写在 `opencode.json` 里，注意不要提交进代码仓库。
 
 ## 网络

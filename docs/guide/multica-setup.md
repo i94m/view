@@ -1,33 +1,6 @@
 # 添加 Runtime
 
-`multica setup self-host` 用于把 multica 连接到**自托管实例**：写入配置、登录并启动 daemon。
-
-## CLI
-
-```bash
-multica setup self-host \
-  --server-url http://210.74.156.242:3456 \
-  --app-url    http://210.74.156.242:3456
-```
-
-## 容器
-
-在容器内执行（见[安装 Multica](/guide/host-install)）：
-
-```bash
-docker exec -it multica-runtime multica setup self-host \
-  --server-url http://210.74.156.242:3456 \
-  --app-url    http://210.74.156.242:3456
-```
-
-## 确认状态
-
-```bash
-multica daemon status                                # CLI
-docker exec -it multica-runtime multica daemon status    # 容器
-```
-
-登录态持久化：CLI 在 `~/.multica`，容器在挂载的 `./multica`，重建容器无需重新配置。
+把 multica 连接到**自托管实例**（写入配置、登录并启动 daemon）。三种运行方式对应三种做法。
 
 ## 桌面端
 
@@ -58,6 +31,33 @@ Desktop 默认连接 Multica Cloud。连接**自托管实例**时，在用户目
   `http://210.74.156.242:3456`。
 
 改完重启 Desktop 生效。
+
+## CLI
+
+```bash
+multica setup self-host \
+  --server-url http://210.74.156.242:3456 \
+  --app-url    http://210.74.156.242:3456
+```
+
+## 容器
+
+在容器内执行（见[安装 Multica](/guide/host-install)）：
+
+```bash
+docker exec -it multica-runtime multica setup self-host \
+  --server-url http://210.74.156.242:3456 \
+  --app-url    http://210.74.156.242:3456
+```
+
+## 确认状态
+
+```bash
+multica daemon status                                    # CLI
+docker exec -it multica-runtime multica daemon status    # 容器
+```
+
+登录态持久化：CLI 在 `~/.multica`，容器在挂载的 `./multica`，重建容器无需重新配置。
 
 ## 相关
 

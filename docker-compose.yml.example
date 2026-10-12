@@ -1,6 +1,7 @@
 services:
   runtime:
     image: registry.cn-hangzhou.aliyuncs.com/tke-view/view:php8.4-multica-runtime
+    container_name: multica-runtime
     env_file: [.env]
     extra_hosts:
       - "git.ap.tkelevator.com:10.251.68.173"

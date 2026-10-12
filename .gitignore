@@ -3,6 +3,9 @@
 .env.*
 !.env.example
 
+# ---- 本机 compose 配置（模板是 docker-compose.yml.example，需提交）----
+docker-compose.yml
+
 # ---- 运行时状态 / 挂载源（含登录 token、任务数据，勿提交）----
 multica/
 workspace/

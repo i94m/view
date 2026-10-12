@@ -8,6 +8,7 @@ ARG TARGETARCH
 
 ARG NODE_VERSION=24.21.0
 ARG MULTICA_VERSION=0.6.1
+ARG OPENCODE_VERSION=2.0.27
 ARG MYSQL_MCP_VERSION=2.0.9
 
 # 1) apt packages + git-lfs.
@@ -58,7 +59,7 @@ RUN --mount=type=cache,target=/root/.npm \
     find /usr/local/lib/node_modules -type f \
         \( -name '*.map' -o -name '*.md' -o -name '*.d.ts' \) -delete
 
-# 3b) opencode (v2, latest, npm package @opencode/cli).
+# 3b) opencode V2 (npm package @opencode/cli, pinned via OPENCODE_VERSION).
 #     Its postinstall execs the freshly linked binary to self-verify; during a
 #     multi-arch build the foreign-arch binary can't run under QEMU, so the script
 #     fails. Install with --ignore-scripts and wire the arch-specific platform
@@ -70,7 +71,7 @@ RUN --mount=type=cache,target=/root/.npm \
       arm64) OPENCODE_PLATFORM=linux-arm64 ;; \
       *) echo "unsupported arch: ${TARGETARCH}" >&2; exit 1 ;; \
     esac; \
-    npm install -g --ignore-scripts "@opencode/cli@latest"; \
+    npm install -g --ignore-scripts "@opencode/cli@${OPENCODE_VERSION}"; \
     CLI_DIR=/usr/local/lib/node_modules/@opencode/cli; \
     SRC="${CLI_DIR}/node_modules/@opencode/cli-${OPENCODE_PLATFORM}/bin/opencode"; \
     test -x "${SRC}"; \

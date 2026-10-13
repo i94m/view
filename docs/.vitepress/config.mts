@@ -10,6 +10,14 @@ export default defineConfig({
   head: [['meta', { name: 'theme-color', content: '#3451b2' }]],
   markdown: {
     lineNumbers: true,
+    image: { lazyLoad: true },
+    container: {
+      tipLabel: '提示',
+      warningLabel: '警告',
+      dangerLabel: '危险',
+      infoLabel: '信息',
+      detailsLabel: '详细信息',
+    },
   },
   themeConfig: {
     nav: [{ text: '指南', link: '/guide/opencode', activeMatch: '/guide/' }],

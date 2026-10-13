@@ -22,9 +22,11 @@
 }
 ```
 
+::: info 说明
 - **默认只读**：三个 `ALLOW_*_OPERATION` 均为 `false`，只开放查询。
 - 连接参数写在 `environment` 里，不在 `.env`（见[配置环境变量](/guide/env)）。
 - `timeout.startup` 预留 60s：首次 `npx` 拉取 `mcp-server-mysql` 可能较慢。
+:::
 
 ::: tip 密钥安全
 `opencode.json` 含数据库密码，不要提交进代码仓库。

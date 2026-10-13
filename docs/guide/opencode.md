@@ -1,7 +1,6 @@
 # OpenCode
 
-[OpenCode](https://opencode.ai) 是开源的 AI 编码 agent，有终端界面、桌面端和 Web 端。在本项目中它
-与 multica 配合，用于执行 agent 任务。
+[OpenCode](https://opencode.ai) 是开源的 AI 编码 agent，有终端界面、桌面端和 Web 端。在本项目中它与 multica 配合，用于执行 agent 任务。
 
 ## 安装 opencode
 
@@ -17,27 +16,33 @@ curl -fsSL https://opencode.ai/v2/install | bash
 opencode --version
 ```
 
-> 若命令执行失败，建议**让 AI 协助安装**，或参考官方文档 <https://opencode.ai/v2/docs>。
->
-> 用**容器方式**运行时**无需安装**：镜像已集成 opencode（及 multica），见[安装 Multica](/guide/host-install)。
+::: tip
+若命令执行失败，建议**让 AI 协助安装**，或参考官方文档 <https://opencode.ai/v2/docs>。
+:::
+
+::: info 容器方式运行时无需安装
+镜像已集成 opencode（及 multica），见[安装 Multica](/guide/host-install)。
+:::
 
 ## 配置模型服务
 
 首次使用先给 opencode 配好模型服务（服务商 / API Key），否则无法调用模型。
 
-**本机**直接运行：
+::: code-group
 
-```bash
+```bash [本机]
 opencode
 ```
 
-**容器**里先进入容器，再运行同样的命令：
-
-```bash
+```bash [容器]
 docker exec -it multica-runtime opencode
 ```
 
-> `multica-runtime` 由 `docker-compose.yml` 的 `container_name` 固定；
+:::
+
+::: tip
+`multica-runtime` 是 `docker-compose.yml` 里固定的容器名（`container_name`）。
+:::
 
 在界面里输入 `/connect`，按提示选择模型服务商、填入 API Key，保存后即可使用。
 

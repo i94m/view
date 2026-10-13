@@ -1,7 +1,6 @@
 # 安装 Multica
 
-multica 有三种运行方式，任选其一：**桌面端（推荐）**、**CLI**、**容器**。连接自托管实例、启动
-daemon 的步骤见 [添加 Runtime](/guide/multica-setup)。
+multica 有三种运行方式，任选其一：**桌面端（推荐）**、**CLI**、**容器**。连接自托管实例、启动 daemon 的步骤见 [添加 Runtime](/guide/multica-setup)。
 
 ## 桌面端（推荐）
 
@@ -12,8 +11,7 @@ Multica Desktop 是 Multica 的桌面客户端。
 
 ### 连接自托管实例
 
-Desktop 默认连接 Multica Cloud。若要连接**自托管实例**，需在用户目录的 `.multica` 下创建
-`desktop.json`，填入自托管实例的地址：
+Desktop 默认连接 Multica Cloud。若要连接**自托管实例**，需在用户目录的 `.multica` 下创建 `desktop.json`，填入自托管实例的地址：
 
 | 平台 | 路径 |
 | --- | --- |
@@ -21,7 +19,9 @@ Desktop 默认连接 Multica Cloud。若要连接**自托管实例**，需在用
 | Linux | `/home/<你>/.multica/desktop.json` |
 | Windows | `C:\Users\<你>\.multica\desktop.json` |
 
-> 以上为默认位置。用户目录被迁移或重定向过的话，用实际路径；`.multica` 目录不存在时先创建。
+::: tip
+以上为默认位置。用户目录被迁移或重定向过的话，用实际路径；`.multica` 目录不存在时先创建。
+:::
 
 文件内容：
 
@@ -33,8 +33,7 @@ Desktop 默认连接 Multica Cloud。若要连接**自托管实例**，需在用
 ```
 
 - `schemaVersion`：固定填 `1`。
-- `apiUrl`：自托管实例地址，与 `.env` 里的 `MULTICA_SERVER_URL` 一致；本项目为
-  `http://210.74.156.242:3456`。
+- `apiUrl`：自托管实例地址，与 `.env` 里的 `MULTICA_SERVER_URL` 一致；本项目为 `http://210.74.156.242:3456`。
 
 改完重启 Desktop 生效。
 
@@ -42,17 +41,17 @@ Desktop 默认连接 Multica Cloud。若要连接**自托管实例**，需在用
 
 ### 1. 安装
 
-macOS / Linux：
+::: code-group
 
-```bash
+```bash [macOS / Linux]
 curl -fsSL http://210.74.156.242:8008/multica/install.sh | bash
 ```
 
-Windows PowerShell：
-
-```powershell
+```powershell [Windows PowerShell]
 iwr http://210.74.156.242:8008/multica/install.ps1 | iex
 ```
+
+:::
 
 ### 2. 连接自托管实例
 
@@ -60,11 +59,13 @@ iwr http://210.74.156.242:8008/multica/install.ps1 | iex
 
 ## 容器
 
-用 docker compose 运行 multica runtime。镜像内**已集成 multica 与 opencode**（另含 openspec、uv、
-MySQL MCP 等），**无需另行安装**；宿主机上只需要装好 Docker / Docker Compose。
+用 docker compose 运行 multica runtime；下面所有命令都在 `docker-compose.yml` 所在目录执行。
 
-下面所有命令都在 `docker-compose.yml` 所在目录执行；连接自托管实例、启动 daemon 见
-[添加 Runtime](/guide/multica-setup)。
+::: tip 镜像已集成，无需另行安装
+镜像内含 **multica 与 opencode**（及 openspec、uv、MySQL MCP 等），宿主机只需装好 Docker / Docker Compose。
+:::
+
+连接自托管实例、启动 daemon 见 [添加 Runtime](/guide/multica-setup)。
 
 ### 前置条件：先安装 Docker Compose
 
@@ -75,10 +76,8 @@ docker --version
 docker compose version
 ```
 
-- 未安装 Docker：按系统到 <https://docs.docker.com/get-docker/> 安装（macOS / Windows 用
-  Docker Desktop，Linux 用 Docker Engine）。
-- Compose 需 **v2**：命令是 `docker compose`（中间是空格），不是旧的 `docker-compose`。
-  Docker Desktop 自带，Linux 单独安装见 <https://docs.docker.com/compose/install/>。
+- 未安装 Docker：按系统到 <https://docs.docker.com/get-docker/> 安装（macOS / Windows 用 Docker Desktop，Linux 用 Docker Engine）。
+- Compose 需 **v2**：命令是 `docker compose`（中间是空格），不是旧的 `docker-compose`。Docker Desktop 自带，Linux 单独安装见 <https://docs.docker.com/compose/install/>。
 
 ### 配置 .env
 
@@ -89,7 +88,7 @@ docker compose version
 GIT_VIEW_CODE=https://git.ap.tkelevator.com/VIEW/view_code.git
 GIT_AI_ASSET=https://git.ap.tkelevator.com/AI/AI_Asset.git
 
-# Git 身份 / 凭据（含 @ : / % 需 URL 编码，建议用 access token）
+# Git 身份 / 凭据（含 @ : / % 需 URL 编码）
 GIT_EMAIL=you@rayootech.com
 GIT_USERNAME=your-username
 GIT_PASSWORD=your-token
@@ -108,7 +107,7 @@ MULTICA_SERVER_URL=http://210.74.156.242:3456
 
 在当前目录创建 `docker-compose.yml`，按本机实际路径修改 `volumes`：
 
-```yaml
+```yaml{4,18-22}
 services:
   runtime:
     image: registry.cn-hangzhou.aliyuncs.com/tke-view/view:php8.4-multica-runtime

@@ -89,9 +89,3 @@ echo $env:GIT_USERNAME
 
 > 容器里，路径变量由 docker-compose 的 `environment` 设为容器内路径，其余变量由 `.env`
 > 注入（见[安装 Multica](/guide/host-install)）。浏览器 MCP / 数据库 MCP 的配置不在环境变量里。
-
-## 相关
-
-- [安装 Multica](/guide/host-install)
-- [安装 Multica](/guide/host-install)
-- [OpenCode 配置](/guide/opencode)

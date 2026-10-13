@@ -29,8 +29,3 @@
 ::: tip 密钥安全
 `opencode.json` 含数据库密码，不要提交进代码仓库。
 :::
-
-## 相关
-
-- [OpenCode 配置](/guide/opencode)
-- [浏览器 MCP](/guide/mcp-playwright)

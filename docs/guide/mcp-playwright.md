@@ -65,8 +65,3 @@ docker run -d -i --rm --init --pull=always \
 - 不需要在 docker-compose 里做 Playwright 绑定，容器独立运行。
 
 官方文档：[Playwright MCP › Docker](https://github.com/microsoft/playwright-mcp#docker)。
-
-## 相关
-
-- [OpenCode 配置](/guide/opencode)
-- [数据库 MCP](/guide/mcp-database)

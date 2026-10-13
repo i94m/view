@@ -57,10 +57,3 @@ docker exec -it multica-runtime opencode
   - [数据库 MCP](/guide/mcp-database) —— 查询 MySQL（默认只读）
 
 改完重启 opencode 生效。
-
-## 相关
-
-- [安装 Multica](/guide/host-install)
-- [浏览器 MCP](/guide/mcp-playwright)
-- [数据库 MCP](/guide/mcp-database)
-- [配置环境变量](/guide/env)

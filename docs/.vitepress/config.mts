@@ -12,10 +12,7 @@ export default defineConfig({
     lineNumbers: true,
   },
   themeConfig: {
-    nav: [
-      { text: '指南', link: '/guide/opencode', activeMatch: '/guide/' },
-      { text: '附录', link: '/appendix/notes', activeMatch: '/appendix/' },
-    ],
+    nav: [{ text: '指南', link: '/guide/opencode', activeMatch: '/guide/' }],
 
     sidebar: {
       '/guide/': [
@@ -34,12 +31,6 @@ export default defineConfig({
             { text: '浏览器 MCP', link: '/guide/mcp-playwright' },
             { text: '数据库 MCP', link: '/guide/mcp-database' },
           ],
-        },
-      ],
-      '/appendix/': [
-        {
-          text: '附录',
-          items: [{ text: '注意事项', link: '/appendix/notes' }],
         },
       ],
     },

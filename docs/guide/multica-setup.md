@@ -58,8 +58,3 @@ docker exec -it multica-runtime multica daemon status    # 容器
 ```
 
 登录态持久化：CLI 在 `~/.multica`，容器在挂载的 `./multica`，重建容器无需重新配置。
-
-## 相关
-
-- [安装 Multica](/guide/host-install)
-- [配置环境变量](/guide/env)

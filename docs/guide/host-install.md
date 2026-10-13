@@ -60,7 +60,7 @@ iwr http://210.74.156.242:8008/multica/install.ps1 | iex
 
 ## 容器
 
-用 docker compose Multica runtime。镜像内**已集成 multica 与 opencode**（另含 openspec、uv、
+用 docker compose 运行 multica runtime。镜像内**已集成 multica 与 opencode**（另含 openspec、uv、
 MySQL MCP 等），**无需另行安装**；宿主机上只需要装好 Docker / Docker Compose。
 
 下面所有命令都在 `docker-compose.yml` 所在目录执行；连接自托管实例、启动 daemon 见
@@ -82,11 +82,7 @@ docker compose version
 
 ### 配置 .env
 
-复制模板后按需填写：
-
-```bash
-cp .env.example .env
-```
+在当前目录创建 `.env`，按需填写：
 
 ```dotenv
 # Git 仓库地址（GIT_VIEW_CODE 供 entrypoint 推导 git host）
@@ -110,11 +106,7 @@ MULTICA_SERVER_URL=http://210.74.156.242:3456
 
 ### 配置 docker-compose.yml
 
-复制模板后，按本机实际路径修改 `volumes`：
-
-```bash
-cp docker-compose.yml.example docker-compose.yml
-```
+在当前目录创建 `docker-compose.yml`，按本机实际路径修改 `volumes`：
 
 ```yaml
 services:
@@ -155,8 +147,6 @@ networks:
       config:
         - subnet: 172.16.10.0/24
 ```
-
-> `docker-compose.yml` 本身不入库（见 `.gitignore`），仓库只提供模板 `docker-compose.yml.example`。
 
 ### 启动
 

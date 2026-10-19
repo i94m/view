@@ -80,6 +80,7 @@ VIEW_PASSWORD=your-test-password
 
 # multica
 MULTICA_SERVER_URL=http://210.74.156.242:3456
+MULTICA_DAEMON_DEVICE_NAME="{动态名称}'s Runtime on Container"
 ```
 
 ::: warning

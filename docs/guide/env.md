@@ -87,6 +87,7 @@ echo $env:GIT_USERNAME
 | `GIT_PASSWORD` | git 凭据；含 `@ : / %` 需 URL 编码 |
 | `VIEW_USERNAME` / `VIEW_PASSWORD` | View 自动化测试登录凭据 |
 | `MULTICA_SERVER_URL` | multica server 地址 |
+| `MULTICA_DAEMON_DEVICE_NAME` | multica daemon 设备名；容器 `.env` 中建议填 `"{动态名称}'s Runtime on Container"` |
 
 ::: tip 容器中的路径变量
 容器里，路径变量由 docker-compose 的 `environment` 设为容器内路径，其余变量由 `.env` 注入（见[安装 Multica](/guide/host-install)）。浏览器 MCP / 数据库 MCP 的配置不在环境变量里。

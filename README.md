@@ -101,6 +101,7 @@ Web 入口：apache 监听容器内 **80**，compose 映射到宿主 **8080**（
 | （登录） | 登录态存于 `./multica/config.json`（挂载持久化），首次进容器 `multica login --token mul_xxx` |
 | `VIEW_USERNAME` / `VIEW_PASSWORD` | Playwright 登录凭据（`login.ts` 读取） |
 | `MULTICA_SERVER_URL` | multica server 地址 |
+| `MULTICA_DAEMON_DEVICE_NAME` | multica daemon 设备名；容器里建议填 `"{动态名称}'s Runtime on Container"` |
 
 > Playwright / MySQL MCP（数据库连接）的配置**不在 `.env`**，而在容器内的
 > `opencode.json` 里直接填写，见 `docs/guide/opencode.md`。

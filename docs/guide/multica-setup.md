@@ -1,5 +1,13 @@
 # 添加 Runtime
 
+<div style="margin: 16px 0 24px;">
+  <video controls preload="metadata" playsinline poster="/videos/add-runtime-and-create-agent-poster.jpg" style="width: 100%; border-radius: 8px; background: #000;">
+    <source src="/videos/add-runtime-and-create-agent.mp4" type="video/mp4" />
+    你的浏览器不支持 HTML5 视频，请<a href="../videos/add-runtime-and-create-agent.mp4">下载视频</a>观看。
+  </video>
+  <p style="margin-top: 8px; text-align: center; color: var(--vp-c-text-2); font-size: 14px;">视频教程：添加 Runtime 并创建 Agent</p>
+</div>
+
 把 multica 连接到**自托管实例**（写入配置、登录并启动 daemon）。三种运行方式对应三种做法。
 
 ## 桌面端

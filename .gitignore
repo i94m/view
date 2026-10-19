@@ -7,9 +7,12 @@
 docker-compose.yml
 
 # ---- 运行时状态 / 挂载源（含登录 token、任务数据，勿提交）----
+.multica/
 multica/
 workspace/
 opencode/
+opencode-config/
+opencode-data/
 sites/
 view_sql/
 

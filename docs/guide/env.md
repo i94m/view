@@ -22,7 +22,6 @@ export GIT_PASSWORD="your-token"
 # View账号
 export VIEW_USERNAME="you@rayootech.com"
 export VIEW_PASSWORD="your-test-password"
-export VIEW_USER_8ID="your-8id"
 
 # multica
 export MULTICA_SERVER_URL="http://210.74.156.242:3456"
@@ -63,7 +62,6 @@ setx GIT_PASSWORD "your-token"
 # View账号
 setx VIEW_USERNAME "you@rayootech.com"
 setx VIEW_PASSWORD "your-test-password"
-setx VIEW_USER_8ID "your-8id"
 
 # multica
 setx MULTICA_SERVER_URL "http://210.74.156.242:3456"
@@ -94,7 +92,6 @@ echo $env:GIT_USERNAME
 | `GIT_EMAIL` / `GIT_USERNAME` | git 身份 |
 | `GIT_PASSWORD` | git 凭据；含 `@ : / %` 需 URL 编码 |
 | `VIEW_USERNAME` / `VIEW_PASSWORD` | View账号 |
-| `VIEW_USER_8ID` | 用户的8ID |
 | `MULTICA_SERVER_URL` | multica server 地址 |
 | `MULTICA_DAEMON_DEVICE_NAME` | multica daemon 设备名，例如 `"Your-Name's Runtime on Host"` |
 

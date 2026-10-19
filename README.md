@@ -100,6 +100,7 @@ Web 入口：apache 监听容器内 **80**，compose 映射到宿主 **8080**（
 | `GIT_AI_ASSET` | 保留项，当前无脚本读取 |
 | （登录） | 登录态存于 `./.multica/config.json`（挂载持久化），首次进容器 `multica login --token mul_xxx` |
 | `VIEW_USERNAME` / `VIEW_PASSWORD` | Playwright 登录凭据（`login.ts` 读取） |
+| `VIEW_USER_8ID` | 用户的8ID |
 | `MULTICA_SERVER_URL` | multica server 地址 |
 | `MULTICA_DAEMON_DEVICE_NAME` | multica daemon 设备名；单 runtime 容器 `.env` 中建议填 `"Your-Name's Runtime on Container"`；组件小队按成员在 compose 中分别配置 |
 

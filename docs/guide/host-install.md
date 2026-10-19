@@ -93,9 +93,10 @@ GIT_EMAIL=you@rayootech.com
 GIT_USERNAME=your-username
 GIT_PASSWORD=your-token
 
-# Auto Testing
+# View账号
 VIEW_USERNAME=you@rayootech.com
 VIEW_PASSWORD=your-test-password
+VIEW_USER_8ID=your-8id
 
 # multica
 MULTICA_SERVER_URL=http://210.74.156.242:3456

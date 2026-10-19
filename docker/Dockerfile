@@ -7,8 +7,8 @@ ARG DEBIAN_FRONTEND=noninteractive
 ARG TARGETARCH
 
 ARG NODE_VERSION=24.21.0
-ARG MULTICA_VERSION=0.6.2
-ARG OPENCODE_VERSION=2.0.28
+ARG MULTICA_VERSION=0.6.3
+ARG OPENCODE_VERSION=latest
 ARG MYSQL_MCP_VERSION=2.0.9
 
 # 1) apt packages + git-lfs.
@@ -59,7 +59,7 @@ RUN --mount=type=cache,target=/root/.npm \
     find /usr/local/lib/node_modules -type f \
         \( -name '*.map' -o -name '*.md' -o -name '*.d.ts' \) -delete
 
-# 3b) opencode V2 (npm package @opencode/cli, pinned via OPENCODE_VERSION).
+# 3b) opencode V2 (npm package @opencode/cli, version via OPENCODE_VERSION).
 #     Its postinstall execs the freshly linked binary to self-verify; during a
 #     multi-arch build the foreign-arch binary can't run under QEMU, so the script
 #     fails. Install with --ignore-scripts and wire the arch-specific platform

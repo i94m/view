@@ -11,7 +11,7 @@ docker compose (project: multica，bridge 网络 multica_net，默认子网 172.
 └── runtime        view:php8.4-multica-runtime
     ├── apache / php-fpm (EXPOSE 80，映射到宿主 8080:80)
     ├── multica daemon (entrypoint 自启动)
-    ├── opencode  (配置由使用者自行创建，见 docs/guide/opencode.md)
+    ├── opencode v2  (配置由使用者自行创建，见 docs/guide/opencode.md)
     ├── git + git-lfs (filter.lfs.* 已在镜像内配好)
     ├── uv / uvx (Python 包管理)
     └── MCP: Playwright / MySQL (均在 opencode.json 中定义)
@@ -63,7 +63,7 @@ pnpm preview    # 预览构建产物
 - 已构建/可拉取的 `registry.cn-hangzhou.aliyuncs.com/tke-view/view:php8.4-multica-runtime` 镜像
 - 可访问 TKE 内网 Git、模型 API、multica server、MySQL
 
-> 镜像已内置 **multica 与 opencode**（及 openspec、uv、MySQL MCP），无需在宿主机或容器内另行安装。
+> 镜像已内置 **multica 与 opencode v2**（及 openspec、uv、MySQL MCP），无需在宿主机或容器内另行安装。
 
 ## 快速开始
 

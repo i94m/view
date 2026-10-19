@@ -2,9 +2,13 @@
 
 [OpenCode](https://opencode.ai) 是开源的 AI 编码 agent，有终端界面、桌面端和 Web 端。在本项目中它与 multica 配合，用于执行 agent 任务。
 
+::: tip 推荐版本
+推荐使用 **OpenCode V2**。本项目文档、安装命令与 `opencode.json` 示例均按 V2 编写。
+:::
+
 ## 安装 opencode
 
-本机安装，命令**全系统通用**：
+本机安装 OpenCode V2，命令**全系统通用**：
 
 ```bash
 curl -fsSL https://opencode.ai/v2/install | bash
@@ -60,5 +64,13 @@ docker exec -it multica-runtime opencode
 - MCP：
   - [浏览器 MCP](/guide/mcp-playwright) —— 浏览器自动化
   - [数据库 MCP](/guide/mcp-database) —— 查询 MySQL（默认只读）
+
+建议在配置文件中保留 schema，方便编辑器校验与补全：
+
+```json
+{
+  "$schema": "https://opencode.ai/config.json"
+}
+```
 
 改完重启 opencode 生效。

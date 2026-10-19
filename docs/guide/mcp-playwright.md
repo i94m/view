@@ -2,33 +2,56 @@
 
 为 opencode 提供浏览器自动化（打开页面、点击、截图、抓取等），是 multica 任务执行网页操作/登录的基础。
 
+以下配置适用于 **OpenCode V2**。
+
 ## 各平台配置
 
-写在 `opencode.json` 的 `mcp.servers.playwright`：
+写在 `opencode.json` 的 `mcp.servers.playwright`。下面示例是完整配置；如果已有 `opencode.json`，只把 `mcp.servers.playwright` 合并进去即可。
 
 ::: code-group
 
 ```json [macOS]
-"playwright": {
-  "type": "local",
-  "command": ["npx", "@playwright/mcp@latest", "--browser", "msedge"]
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "servers": {
+      "playwright": {
+        "type": "local",
+        "command": ["npx", "@playwright/mcp@latest", "--browser", "msedge"]
+      }
+    }
+  }
 }
 ```
 
 ```json [Windows 原生]
-"playwright": {
-  "type": "local",
-  "command": ["cmd", "/c", "npx", "--yes", "@playwright/mcp@latest", "--browser", "msedge"]
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "servers": {
+      "playwright": {
+        "type": "local",
+        "command": ["cmd", "/c", "npx", "--yes", "@playwright/mcp@latest", "--browser", "msedge"]
+      }
+    }
+  }
 }
 ```
 
 ```json [WSL]
-"playwright": {
-  "type": "local",
-  "command": [
-    "cmd.exe", "/c", "npx", "--yes", "@playwright/mcp@latest", "--browser", "msedge"
-  ],
-  "codemode": false
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "servers": {
+      "playwright": {
+        "type": "local",
+        "command": [
+          "cmd.exe", "/c", "npx", "--yes", "@playwright/mcp@latest", "--browser", "msedge"
+        ],
+        "codemode": false
+      }
+    }
+  }
 }
 ```
 
@@ -52,9 +75,16 @@ docker run -d -i --rm --init --pull=always \
 ```
 
 ```json
-"playwright": {
-  "type": "remote",
-  "url": "http://localhost:8931/mcp"
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "servers": {
+      "playwright": {
+        "type": "remote",
+        "url": "http://localhost:8931/mcp"
+      }
+    }
+  }
 }
 ```
 

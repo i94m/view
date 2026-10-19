@@ -127,6 +127,7 @@ docker compose exec tester bash
 
 ```json
 {
+  "$schema": "https://opencode.ai/config.json",
   "mcp": {
     "servers": {
       "playwright": {

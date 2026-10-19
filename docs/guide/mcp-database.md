@@ -2,23 +2,32 @@
 
 为 opencode 提供只读的 MySQL 查询能力，供 multica 任务读取业务数据。
 
-写在 `opencode.json` 的 `mcp.servers.local_tkhk`（各平台相同）：
+以下配置适用于 **OpenCode V2**。
+
+写在 `opencode.json` 的 `mcp.servers.local_tkhk`（各平台相同）。下面示例是完整配置；如果已有 `opencode.json`，只把 `mcp.servers.local_tkhk` 合并进去即可。
 
 ```json
-"local_tkhk": {
-  "type": "local",
-  "command": ["npx", "-y", "@benborla29/mcp-server-mysql"],
-  "environment": {
-    "MYSQL_HOST": "数据库地址",
-    "MYSQL_PORT": "3306",
-    "MYSQL_USER": "数据库用户名",
-    "MYSQL_PASS": "数据库密码",
-    "MYSQL_DB": "数据库名",
-    "ALLOW_INSERT_OPERATION": "false",
-    "ALLOW_UPDATE_OPERATION": "false",
-    "ALLOW_DELETE_OPERATION": "false"
-  },
-  "timeout": { "startup": 60000 }
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "servers": {
+      "local_tkhk": {
+        "type": "local",
+        "command": ["npx", "-y", "@benborla29/mcp-server-mysql"],
+        "environment": {
+          "MYSQL_HOST": "数据库地址",
+          "MYSQL_PORT": "3306",
+          "MYSQL_USER": "数据库用户名",
+          "MYSQL_PASS": "数据库密码",
+          "MYSQL_DB": "数据库名",
+          "ALLOW_INSERT_OPERATION": "false",
+          "ALLOW_UPDATE_OPERATION": "false",
+          "ALLOW_DELETE_OPERATION": "false"
+        },
+        "timeout": { "startup": 60000 }
+      }
+    }
+  }
 }
 ```
 

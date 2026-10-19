@@ -99,7 +99,8 @@ VIEW_PASSWORD=your-test-password
 
 # multica
 MULTICA_SERVER_URL=http://210.74.156.242:3456
-MULTICA_DAEMON_DEVICE_NAME="{动态名称}'s Runtime on Container"
+# 单 runtime 的 daemon 设备名；用于在 multica 中区分这台容器，可按用户/机器名修改
+MULTICA_DAEMON_DEVICE_NAME="Your-Name's Runtime on Container"
 ```
 
 变量含义见 [配置环境变量](/guide/env)。

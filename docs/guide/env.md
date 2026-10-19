@@ -25,7 +25,12 @@ export VIEW_PASSWORD="your-test-password"
 
 # multica
 export MULTICA_SERVER_URL="http://210.74.156.242:3456"
+export MULTICA_DAEMON_DEVICE_NAME="Your-Name's Runtime on Windows Host"
 ```
+
+::: tip
+如果是在 WSL 中运行，可以把设备名改成 `"Your-Name's Runtime on WSL Host"`。
+:::
 
 ::: tip 验证
 以 `GIT_USERNAME` 为例：
@@ -60,6 +65,7 @@ setx VIEW_PASSWORD "your-test-password"
 
 # multica
 setx MULTICA_SERVER_URL "http://210.74.156.242:3456"
+setx MULTICA_DAEMON_DEVICE_NAME "Your-Name's Runtime on Windows Host"
 ```
 
 也可以在「系统属性 → 环境变量」里手动添加。
@@ -87,7 +93,7 @@ echo $env:GIT_USERNAME
 | `GIT_PASSWORD` | git 凭据；含 `@ : / %` 需 URL 编码 |
 | `VIEW_USERNAME` / `VIEW_PASSWORD` | View 自动化测试登录凭据 |
 | `MULTICA_SERVER_URL` | multica server 地址 |
-| `MULTICA_DAEMON_DEVICE_NAME` | multica daemon 设备名；容器 `.env` 中建议填 `"{动态名称}'s Runtime on Container"` |
+| `MULTICA_DAEMON_DEVICE_NAME` | multica daemon 设备名，例如 `"Your-Name's Runtime on Host"` |
 
 ::: tip 容器中的路径变量
 容器里，路径变量由 docker-compose 的 `environment` 设为容器内路径，其余变量由 `.env` 注入（见[安装 Multica](/guide/host-install)）。浏览器 MCP / 数据库 MCP 的配置不在环境变量里。

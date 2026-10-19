@@ -1,5 +1,13 @@
 # 浏览器 MCP
 
+<div style="margin: 16px 0 24px;">
+  <video controls preload="metadata" playsinline poster="/videos/add-playwright-mcp-poster.jpg" style="width: 100%; border-radius: 8px; background: #000;">
+    <source src="/videos/add-playwright-mcp.mp4" type="video/mp4" />
+    你的浏览器不支持 HTML5 视频，请<a href="../videos/add-playwright-mcp.mp4">下载视频</a>观看。
+  </video>
+  <p style="margin-top: 8px; text-align: center; color: var(--vp-c-text-2); font-size: 14px;">视频教程：添加浏览器 MCP</p>
+</div>
+
 为 opencode 提供浏览器自动化（打开页面、点击、截图、抓取等），是 multica 任务执行网页操作/登录的基础。
 
 以下配置适用于 **OpenCode V2**。

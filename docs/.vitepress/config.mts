@@ -40,6 +40,12 @@ export default defineConfig({
             { text: '数据库 MCP', link: '/guide/mcp-database' },
           ],
         },
+        {
+          text: 'Agent 协作',
+          items: [
+            { text: '组件小队', link: '/guide/component-squads' },
+          ],
+        },
       ],
     },
 

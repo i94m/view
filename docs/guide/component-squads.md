@@ -80,12 +80,13 @@ VIEW_PASSWORD=your-test-password
 
 # multica
 MULTICA_SERVER_URL=http://210.74.156.242:3456
-MULTICA_DAEMON_DEVICE_NAME="{动态名称}'s Runtime on Container"
 ```
 
 ::: warning
 `.env` 里包含 Git 凭据和测试账号密码，不要提交到 git。
 :::
+
+小队里每个成员应该使用不同的 daemon 设备名，所以 `MULTICA_DAEMON_DEVICE_NAME` 不放在 `.env`，而是在下面的 `docker-compose.yml` 中按成员分别配置。
 
 ### 5. 复制 compose 配置并启动
 
@@ -157,6 +158,7 @@ services:
       AIR_PLATFORM_PATH: /opt/air_platform
       VIEW_SQL_PATH: /opt/db_change_scripts
       AUTO_TESTING_PATH: /opt/auto_testing
+      MULTICA_DAEMON_DEVICE_NAME: "Leader's Runtime on Container"
     volumes:
       - view_code:/opt/tk
       - ai_asset:/opt/ai_asset
@@ -186,6 +188,7 @@ services:
       AIR_PLATFORM_PATH: /opt/air_platform
       VIEW_SQL_PATH: /opt/db_change_scripts
       AUTO_TESTING_PATH: /opt/auto_testing
+      MULTICA_DAEMON_DEVICE_NAME: "Developer's Runtime on Container"
     volumes:
       - view_code:/opt/tk
       - ai_asset:/opt/ai_asset
@@ -215,6 +218,7 @@ services:
       AIR_PLATFORM_PATH: /opt/air_platform
       VIEW_SQL_PATH: /opt/db_change_scripts
       AUTO_TESTING_PATH: /opt/auto_testing
+      MULTICA_DAEMON_DEVICE_NAME: "BA's Runtime on Container"
     volumes:
       - view_code:/opt/tk
       - ai_asset:/opt/ai_asset
@@ -244,6 +248,7 @@ services:
       AIR_PLATFORM_PATH: /opt/air_platform
       VIEW_SQL_PATH: /opt/db_change_scripts
       AUTO_TESTING_PATH: /opt/auto_testing
+      MULTICA_DAEMON_DEVICE_NAME: "Tester's Runtime on Container"
     volumes:
       - view_code:/opt/tk
       - ai_asset:/opt/ai_asset

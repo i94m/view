@@ -20,9 +20,10 @@ services:
       - /Users/wade/web/tke/air_platform:/opt/air_platform
       - /Users/wade/web/tke/view_sql:/opt/db_change_scripts
       - /Users/wade/web/tke/autotest/dev2:/opt/auto_testing
-      - ./multica:/root/.multica
+      - ./.multica:/root/.multica
       - ./workspace:/root/multica_workspaces
-      - ./opencode:/root/.local/share/opencode
+      - ./opencode-config:/root/.config/opencode
+      - ./opencode-data:/root/.local/share/opencode
     ports:
       - "8080:80"
     networks:

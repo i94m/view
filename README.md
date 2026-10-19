@@ -37,7 +37,7 @@ docker compose (project: multica，bridge 网络 multica_net，默认子网 172.
 ├── .env                      # 实际配置（含密钥，已被 .gitignore 忽略）
 ├── docs/                     # VitePress 文档站点（本 README 的内容在这里）
 ├── multica-runtime/          # 精简运行目录（仅 compose + .env.example + README）
-├── multica/                  # multica 登录态持久化（挂载到 /root/.multica）
+├── .multica/                 # multica 登录态持久化（挂载到 /root/.multica）
 ├── workspace/                # multica 任务工作目录（挂载到 /root/multica_workspaces）
 ├── opencode/                 # opencode 数据（挂载到 /root/.local/share/opencode）
 └── README.md
@@ -98,7 +98,7 @@ Web 入口：apache 监听容器内 **80**，compose 映射到宿主 **8080**（
 | `GIT_EMAIL` / `GIT_USERNAME` / `GIT_PASSWORD` | git 身份与凭据；密码含 `@ : / %` 需 URL 编码。entrypoint 会写入 `~/.git-credentials` |
 | `GIT_VIEW_CODE` | 用于推导 git host（`entrypoint-multica.sh`），缺省回退 `git.ap.tkelevator.com` |
 | `GIT_AI_ASSET` | 保留项，当前无脚本读取 |
-| （登录） | 登录态存于 `./multica/config.json`（挂载持久化），首次进容器 `multica login --token mul_xxx` |
+| （登录） | 登录态存于 `./.multica/config.json`（挂载持久化），首次进容器 `multica login --token mul_xxx` |
 | `VIEW_USERNAME` / `VIEW_PASSWORD` | Playwright 登录凭据（`login.ts` 读取） |
 | `MULTICA_SERVER_URL` | multica server 地址 |
 | `MULTICA_DAEMON_DEVICE_NAME` | multica daemon 设备名；单 runtime 容器 `.env` 中建议填 `"Your-Name's Runtime on Container"`；组件小队按成员在 compose 中分别配置 |
@@ -118,11 +118,11 @@ Web 入口：apache 监听容器内 **80**，compose 映射到宿主 **8080**（
 | `/path/to/air_platform` | `/opt/air_platform` | `AIR_PLATFORM_PATH`（AIR Platform 仓库） |
 | `/path/to/view_sql` | `/opt/db_change_scripts` | `VIEW_SQL_PATH`（DB 变更脚本） |
 | `/path/to/auto_testing` | `/opt/auto_testing` | `AUTO_TESTING_PATH`（自动化测试） |
-| `./multica` | `/root/.multica` | multica 登录态持久化 |
+| `./.multica` | `/root/.multica` | multica 登录态持久化 |
 | `./workspace` | `/root/multica_workspaces` | multica 任务工作目录 |
 | `./opencode` | `/root/.local/share/opencode` | opencode 数据 |
 
-> 相对路径（`./multica`、`./opencode` 等）相对于 `docker-compose.yml` 所在处。
+> 相对路径（`./.multica`、`./opencode-data` 等）相对于 `docker-compose.yml` 所在处。
 
 ## 常用命令
 
@@ -197,9 +197,9 @@ docker buildx build --platform linux/arm64 \
 - **网络**：`runtime` 接在 bridge 网络 `multica_net`（子网在 `docker-compose.yml` 里写死）。
   在 macOS Docker Desktop 上，宿主 `ppp0` 的 VPN 路由**不会**进入容器，跨宿主/内网访问用
   `extra_hosts`。
-- **multica 登录**：daemon 启动依赖 `./multica/config.json`（挂载到 `/root/.multica`）；
+- **multica 登录**：daemon 启动依赖 `./.multica/config.json`（挂载到 `/root/.multica`）；
   该文件不存在时 daemon 不会自启，需进容器手动 `multica login --token mul_xxx` 生成一次。
 - **工作目录**：multica 任务目录用其默认值 `$HOME/multica_workspaces`（容器内
   `/root/multica_workspaces`，已挂载 `./workspace`）。注意不要把它设成 `/opt/tk`。
-- 更换部署机器时改 `docker-compose.yml` 里的挂载路径即可（`./multica` 等相对路径无需改），
+- 更换部署机器时改 `docker-compose.yml` 里的挂载路径即可（`./.multica` 等相对路径无需改），
   并重建一次 `opencode.json`。

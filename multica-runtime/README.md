@@ -35,7 +35,7 @@ docker exec -it multica-runtime multica setup self-host \
   --app-url    http://210.74.156.242:3456
 ```
 
-会配置 CLI + 登录 + 启动 daemon；登录态持久化在 `./multica`，重建容器无需重配。
+会配置 CLI + 登录 + 启动 daemon；登录态持久化在 `./.multica`，重建容器无需重配。
 
 验证：
 

@@ -32,11 +32,12 @@
 multica-squads/
 ├── docker-compose.yml
 ├── .env
-├── workspace/          # Playwright 默认输出目录，可按需改成某个成员的 workspace
+├── playwright-output/  # Playwright 默认输出目录
 ├── leader/
-│   ├── multica/
+│   ├── .multica/
 │   ├── workspace/
-│   └── opencode/
+│   ├── opencode-config/
+│   └── opencode-data/
 ├── developer/
 ├── ba/
 └── tester/
@@ -99,7 +100,7 @@ docker compose up -d
 
 ### 6. 初始化每个成员
 
-每个成员都有独立的 `./<role>/multica`、`./<role>/workspace`、`./<role>/opencode`。首次使用时，分别进入成员容器完成登录和模型配置：
+每个成员都有独立的 `./<role>/.multica`、`./<role>/workspace`、`./<role>/opencode-config`、`./<role>/opencode-data`。首次使用时，分别进入成员容器完成登录和模型配置：
 
 ```bash
 docker compose exec leader bash
@@ -120,7 +121,7 @@ docker compose exec tester bash
 ## 前置条件
 
 - 共享代码目录已存在；默认路径为 `/opt/view/dev`、`/opt/view/ai_asset`、`/opt/view/air_platform`、`/opt/view/view_sql`、`/opt/view/view_autotest_dev2`。如路径不同，请修改 compose 顶层 `volumes` 配置。
-- 宿主机已准备 Playwright Chromium 缓存：`/root/.cache/ms-playwright/chromium-1208`。如版本或路径不同，请同步修改 `playwright.volumes` 与 `--executable-path`。
+- 宿主机已准备 Playwright Chromium 缓存：`/root/.cache/ms-playwright/chromium-1208`。如版本或路径不同，请同步修改 `playwright` 服务的 `volumes` 与 `--executable-path`。
 - opencode 的浏览器 MCP 配置应使用远程地址：`http://playwright:8931/mcp`。
 
 示例 `opencode.json` 片段：
@@ -166,11 +167,11 @@ services:
       - air_platform:/opt/air_platform
       - view_sql:/opt/db_change_scripts
       - auto_testing:/opt/auto_testing
-      - ./leader/multica:/root/.multica
+      - ./leader/.multica:/root/.multica
       - ./leader/workspace:/root/multica_workspaces
-      - ./leader/opencode:/root/.local/share/opencode
-      # 只读读取 Playwright 共享输出，例如 /root/playwright_workspace/.playwright-output
-      - ./workspace:/root/playwright_workspace:ro
+      - ./leader/opencode-config:/root/.config/opencode
+      - ./leader/opencode-data:/root/.local/share/opencode
+      - ./playwright-output:/root/playwright-output:ro
     restart: unless-stopped
 
   developer:
@@ -196,11 +197,11 @@ services:
       - air_platform:/opt/air_platform
       - view_sql:/opt/db_change_scripts
       - auto_testing:/opt/auto_testing
-      - ./developer/multica:/root/.multica
+      - ./developer/.multica:/root/.multica
       - ./developer/workspace:/root/multica_workspaces
-      - ./developer/opencode:/root/.local/share/opencode
-      # 只读读取 Playwright 共享输出，例如 /root/playwright_workspace/.playwright-output
-      - ./workspace:/root/playwright_workspace:ro
+      - ./developer/opencode-config:/root/.config/opencode
+      - ./developer/opencode-data:/root/.local/share/opencode
+      - ./playwright-output:/root/playwright-output:ro
     restart: unless-stopped
 
   ba:
@@ -226,11 +227,11 @@ services:
       - air_platform:/opt/air_platform
       - view_sql:/opt/db_change_scripts
       - auto_testing:/opt/auto_testing
-      - ./ba/multica:/root/.multica
+      - ./ba/.multica:/root/.multica
       - ./ba/workspace:/root/multica_workspaces
-      - ./ba/opencode:/root/.local/share/opencode
-      # 只读读取 Playwright 共享输出，例如 /root/playwright_workspace/.playwright-output
-      - ./workspace:/root/playwright_workspace:ro
+      - ./ba/opencode-config:/root/.config/opencode
+      - ./ba/opencode-data:/root/.local/share/opencode
+      - ./playwright-output:/root/playwright-output:ro
     restart: unless-stopped
 
   tester:
@@ -256,11 +257,11 @@ services:
       - air_platform:/opt/air_platform
       - view_sql:/opt/db_change_scripts
       - auto_testing:/opt/auto_testing
-      - ./tester/multica:/root/.multica
+      - ./tester/.multica:/root/.multica
       - ./tester/workspace:/root/multica_workspaces
-      - ./tester/opencode:/root/.local/share/opencode
-      # 只读读取 Playwright 共享输出，例如 /root/playwright_workspace/.playwright-output
-      - ./workspace:/root/playwright_workspace:ro
+      - ./tester/opencode-config:/root/.config/opencode
+      - ./tester/opencode-data:/root/.local/share/opencode
+      - ./playwright-output:/root/playwright-output:ro
     restart: unless-stopped
 
   playwright:
@@ -272,8 +273,8 @@ services:
     volumes:
       # 复用本机（宿主机）已安装的 Playwright Chromium，避免镜像内没有 msedge
       - /root/.cache/ms-playwright/chromium-1208:/host-chromium:ro
-      # 与 runtime 挂载同一份工作区到相同路径，截图/快照可直接写入 agent 工作区
-      - ./workspace:/root/multica_workspaces
+      # 挂载共享输出目录；容器内路径需与 --output-dir 一致
+      - ./playwright-output:/root/playwright-output
     command:
       - "--headless"
       - "--browser"
@@ -285,7 +286,7 @@ services:
       - "--allow-unrestricted-file-access"
       # 自动命名文件（无显式 filename 的截图/快照）落到共享工作区
       - "--output-dir"
-      - "/root/multica_workspaces/.playwright-output"
+      - "/root/playwright-output"
       - "--port"
       - "8931"
       - "--host"
@@ -358,36 +359,37 @@ docker compose exec leader opencode
 | `air_platform:/opt/air_platform` | 多个角色共享 AIR Platform；宿主机路径由顶层 `volumes.air_platform` 配置 |
 | `view_sql:/opt/db_change_scripts` | 多个角色共享 DB 变更脚本；宿主机路径由顶层 `volumes.view_sql` 配置 |
 | `auto_testing:/opt/auto_testing` | 多个角色共享自动化测试；宿主机路径由顶层 `volumes.auto_testing` 配置 |
-| `./<role>/multica:/root/.multica` | 每个成员独立 multica 登录态 |
+| `./<role>/.multica:/root/.multica` | 每个成员独立 multica 登录态 |
 | `./<role>/workspace:/root/multica_workspaces` | 每个成员独立任务工作区 |
-| `./<role>/opencode:/root/.local/share/opencode` | 每个成员独立 opencode 数据 |
-| `./workspace:/root/playwright_workspace:ro` | 每个成员只读读取 Playwright 共享输出 |
+| `./<role>/opencode-config:/root/.config/opencode` | 每个成员独立 opencode 全局配置（模型、MCP、CLI 设置等） |
+| `./<role>/opencode-data:/root/.local/share/opencode` | 每个成员独立 opencode 数据 |
+| `./playwright-output:/root/playwright-output:ro` | 每个成员只读读取 Playwright 共享输出 |
 
 ::: warning Playwright 输出目录
-`playwright` 服务默认把输出写到 `./workspace`。
+小队默认只启动一个 `playwright` 服务。服务默认把输出写到容器内 `/root/playwright-output`，对应宿主机 `./playwright-output`。
 
-各成员容器默认以只读方式挂载同一个目录到 `/root/playwright_workspace`，所以可以从下面路径读取浏览器截图/快照：
+各成员容器默认以只读方式把同一个宿主机输出目录挂载到 `/root/playwright-output`，所以 Playwright MCP 返回的截图/快照路径可以直接读取：
 
 ```bash
-/root/playwright_workspace/.playwright-output
+/root/playwright-output
 ```
 
 只读挂载不会影响成员自己的任务目录 `/root/multica_workspaces`。
 
-如果希望截图/快照进入某个角色的工作区，需要同时修改 `playwright.volumes` 和各成员的只读挂载，确保它们指向同一个宿主机目录：
+如果需要调整 Playwright 输出目录，需要同时修改 `playwright` 服务和各成员 runtime 的挂载，确保两边指向同一个宿主机目录：
 
 ```yaml
 services:
   leader:
     volumes:
-      - ./leader/workspace:/root/playwright_workspace:ro
+      - ./playwright-output:/root/playwright-output:ro
 
   playwright:
     volumes:
-      - ./leader/workspace:/root/multica_workspaces
+      - ./playwright-output:/root/playwright-output
 ```
 
-其他成员同理。也可以改成一个共享目录，例如 `./shared/workspace`，方便所有角色查看浏览器输出。
+其他成员同理。也可以改成其他共享目录，例如 `./shared/playwright-output`，方便所有角色查看浏览器输出。
 :::
 
 ## 常用维护命令

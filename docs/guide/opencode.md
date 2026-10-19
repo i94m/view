@@ -58,6 +58,27 @@ docker exec -it multica-runtime opencode
 | Windows 原生 | `C:\Users\<用户名>\.config\opencode\opencode.json` |
 | 容器 | `/root/.config/opencode/opencode.json` |
 
+使用本项目提供的 `docker-compose.yml` 启动容器时，容器内的全局配置目录已挂载到宿主机：
+
+```text
+./opencode-config:/root/.config/opencode
+```
+
+因此在容器里保存的全局配置会落到 compose 所在目录下的 `./opencode-config/`。例如：
+
+```text
+./opencode-config/opencode.json
+./opencode-config/cli.json
+```
+
+OpenCode 的运行数据目录也会单独持久化：
+
+```text
+./opencode-data:/root/.local/share/opencode
+```
+
+其中 `opencode-config` 用于保存模型、MCP、CLI 设置等配置；`opencode-data` 用于保存会话数据库、日志、snapshot 等运行数据。
+
 `opencode.json` 用于指定模型（`model` / `provider`）与配置 MCP：
 
 - 模型：选择要使用的服务商与模型；

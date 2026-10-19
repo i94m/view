@@ -109,7 +109,7 @@ MULTICA_DAEMON_DEVICE_NAME="Your-Name's Runtime on Container"
 
 在当前目录创建 `docker-compose.yml`，按本机实际路径修改 `volumes`：
 
-```yaml{4,18-22}
+```yaml{4,18-23}
 services:
   runtime:
     image: registry.cn-hangzhou.aliyuncs.com/tke-view/view:php8.4-multica-runtime
@@ -132,9 +132,10 @@ services:
       - /path/to/air_platform:/opt/air_platform
       - /path/to/view_sql:/opt/db_change_scripts
       - /path/to/auto_testing:/opt/auto_testing
-      - ./multica:/root/.multica
+      - ./.multica:/root/.multica
       - ./workspace:/root/multica_workspaces
-      - ./opencode:/root/.local/share/opencode
+      - ./opencode-config:/root/.config/opencode
+      - ./opencode-data:/root/.local/share/opencode
     ports:
       - "8080:80"
     networks:
@@ -161,3 +162,8 @@ apache 监听容器内 80，映射到宿主 8080：`http://127.0.0.1:8080`。
 ### 配置 opencode
 
 容器内 opencode 的安装与配置（模型服务、MCP 等）见 [OpenCode 配置](/guide/opencode)。
+
+上面的 compose 已将 opencode 的两类目录持久化：
+
+- `./opencode-config:/root/.config/opencode`：全局配置，例如 `opencode.json`、`cli.json`、MCP 配置、模型服务配置等。
+- `./opencode-data:/root/.local/share/opencode`：会话、数据库、日志等运行数据。

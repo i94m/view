@@ -113,7 +113,7 @@ Web 入口：apache 监听容器内 **80**，compose 映射到宿主 **8080**（
 
 | 宿主路径（示例） | 容器路径 | 变量 / 用途 |
 | --- | --- | --- |
-| `/path/to/view` | `/opt/tk` | `VIEW_CODE_PATH`（VIEW 代码仓库 / 工作目录） |
+| `/path/to/view` | `/workspace` | `VIEW_CODE_PATH`（VIEW 代码仓库 / 工作目录，compose `working_dir`） |
 | `/path/to/asset` | `/opt/ai_asset` | `AI_ASSET_PATH`（AI Asset 仓库） |
 | `/path/to/air_platform` | `/opt/air_platform` | `AIR_PLATFORM_PATH`（AIR Platform 仓库） |
 | `/path/to/view_sql` | `/opt/db_change_scripts` | `VIEW_SQL_PATH`（DB 变更脚本） |
@@ -200,6 +200,8 @@ docker buildx build --platform linux/arm64 \
 - **multica 登录**：daemon 启动依赖 `./.multica/config.json`（挂载到 `/root/.multica`）；
   该文件不存在时 daemon 不会自启，需进容器手动 `multica login --token mul_xxx` 生成一次。
 - **工作目录**：multica 任务目录用其默认值 `$HOME/multica_workspaces`（容器内
-  `/root/multica_workspaces`，已挂载 `./workspace`）。注意不要把它设成 `/opt/tk`。
+  `/root/multica_workspaces`，已挂载 `./workspace`），与镜像 `WORKDIR /workspace` 无关；
+  可用 `MULTICA_WORKSPACES_ROOT` / `daemon start --workspaces-root` 覆盖。唯一约束是工作区根
+  不能是当前工作目录或包含当前工作目录，否则 multica 会拒绝 `daemon start/status`。
 - 更换部署机器时改 `docker-compose.yml` 里的挂载路径即可（`./.multica` 等相对路径无需改），
   并重建一次 `opencode.json`。

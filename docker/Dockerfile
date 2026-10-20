@@ -108,19 +108,31 @@ RUN set -eux; \
 
 # 5) git env auto-apply wrapper (still execs the base image entrypoint)
 #    opencode 不内置任何配置：/root/.config/opencode/ 只建目录，由使用者按文档自行
-#    创建 opencode.json（见 docs/guide/opencode.md）。放在 /root 下可避开 /opt/tk 挂载。
+#    创建 opencode.json（见 docs/guide/opencode.md）。放在 /root 下，避开代码仓库挂载点。
 COPY entrypoint-multica.sh /run/entrypoint-multica.sh
 RUN chmod +x /run/entrypoint-multica.sh && \
-    mkdir -p /opt/tk /opt/ai_asset /root/.config/opencode
+    mkdir -p /workspace /opt/ai_asset /root/.config/opencode
+
+# 5b) 基础镜像把 Apache 文档根、PHP include_path 和 tk 用户家目录都写死在 /opt/tk；
+#     本镜像的代码挂载点改为 /workspace，这里同步改写，否则 8080 上的站点会 404/403。
+RUN set -eux; \
+    sed -i 's#/opt/tk#/workspace#g' \
+        /etc/apache2/sites-enabled/view.conf \
+        /etc/php/8.4/fpm/php.ini \
+        /etc/php/8.4/cli/php.ini; \
+    usermod -d /workspace tk
 
 # Playwright login helper (reads VIEW_USERNAME / VIEW_PASSWORD).
 COPY login.ts /opt/playwright/login.ts
 
-# 默认工作目录 = /opt/tk（仓库挂载点）。multica 任务工作目录不设 ENV，用其默认值
-# $HOME/multica_workspaces（容器内 /root/multica_workspaces，compose 已挂载）。
-# 注意别把工作目录设成 /opt/tk，否则 multica 会认为当前目录是「daemon 托管的任务目录」
-# 而拒绝 daemon start。
-WORKDIR /opt/tk
+# 默认工作目录 = /workspace（VIEW 代码仓库的挂载点）。multica 的「任务工作目录」与
+# WORKDIR 无关：它固定用工作区根 $HOME/multica_workspaces（容器内
+# /root/multica_workspaces，compose 已挂载），可用 --workspaces-root /
+# MULTICA_WORKSPACES_ROOT 覆盖。
+# 唯一约束：工作区根既不能设成当前工作目录，也不能包含当前工作目录，否则 multica 会
+# 认为自己是「daemon 托管的任务」而拒绝 daemon start/status。/workspace 与
+# /root/multica_workspaces 互不包含，天然满足该约束。
+WORKDIR /workspace
 
 # Overrides the base image CMD (base has no ENTRYPOINT); the wrapper execs /run/entrypoint.sh.
 # EXPOSE 80 is inherited.

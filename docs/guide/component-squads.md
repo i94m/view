@@ -53,7 +53,7 @@ multica-squads/
 
 | 顶层 volume | 默认宿主机目录 | 容器内路径 | 用途 |
 | --- | --- | --- | --- |
-| `view_code` | `/opt/view/dev` | `/opt/tk` | VIEW 代码仓库 / 工作目录 |
+| `view_code` | `/opt/view/dev` | `/workspace` | VIEW 代码仓库 / 工作目录 |
 | `ai_asset` | `/opt/view/ai_asset` | `/opt/ai_asset` | AI Asset 仓库 |
 | `air_platform` | `/opt/view/air_platform` | `/opt/air_platform` | AIR Platform 仓库 |
 | `view_sql` | `/opt/view/view_sql` | `/opt/db_change_scripts` | DB 变更脚本 |
@@ -151,18 +151,18 @@ services:
       - playwright
     extra_hosts:
       - "git.ap.tkelevator.com:10.251.68.173"
-    working_dir: /opt/tk
+    working_dir: /workspace
     stdin_open: true
     tty: true
     environment:
-      VIEW_CODE_PATH: /opt/tk
+      VIEW_CODE_PATH: /workspace
       AI_ASSET_PATH: /opt/ai_asset
       AIR_PLATFORM_PATH: /opt/air_platform
       VIEW_SQL_PATH: /opt/db_change_scripts
       AUTO_TESTING_PATH: /opt/auto_testing
       MULTICA_DAEMON_DEVICE_NAME: "Leader's Runtime on Container"
     volumes:
-      - view_code:/opt/tk
+      - view_code:/workspace
       - ai_asset:/opt/ai_asset
       - air_platform:/opt/air_platform
       - view_sql:/opt/db_change_scripts
@@ -181,18 +181,18 @@ services:
       - playwright
     extra_hosts:
       - "git.ap.tkelevator.com:10.251.68.173"
-    working_dir: /opt/tk
+    working_dir: /workspace
     stdin_open: true
     tty: true
     environment:
-      VIEW_CODE_PATH: /opt/tk
+      VIEW_CODE_PATH: /workspace
       AI_ASSET_PATH: /opt/ai_asset
       AIR_PLATFORM_PATH: /opt/air_platform
       VIEW_SQL_PATH: /opt/db_change_scripts
       AUTO_TESTING_PATH: /opt/auto_testing
       MULTICA_DAEMON_DEVICE_NAME: "Developer's Runtime on Container"
     volumes:
-      - view_code:/opt/tk
+      - view_code:/workspace
       - ai_asset:/opt/ai_asset
       - air_platform:/opt/air_platform
       - view_sql:/opt/db_change_scripts
@@ -211,18 +211,18 @@ services:
       - playwright
     extra_hosts:
       - "git.ap.tkelevator.com:10.251.68.173"
-    working_dir: /opt/tk
+    working_dir: /workspace
     stdin_open: true
     tty: true
     environment:
-      VIEW_CODE_PATH: /opt/tk
+      VIEW_CODE_PATH: /workspace
       AI_ASSET_PATH: /opt/ai_asset
       AIR_PLATFORM_PATH: /opt/air_platform
       VIEW_SQL_PATH: /opt/db_change_scripts
       AUTO_TESTING_PATH: /opt/auto_testing
       MULTICA_DAEMON_DEVICE_NAME: "BA's Runtime on Container"
     volumes:
-      - view_code:/opt/tk
+      - view_code:/workspace
       - ai_asset:/opt/ai_asset
       - air_platform:/opt/air_platform
       - view_sql:/opt/db_change_scripts
@@ -241,18 +241,18 @@ services:
       - playwright
     extra_hosts:
       - "git.ap.tkelevator.com:10.251.68.173"
-    working_dir: /opt/tk
+    working_dir: /workspace
     stdin_open: true
     tty: true
     environment:
-      VIEW_CODE_PATH: /opt/tk
+      VIEW_CODE_PATH: /workspace
       AI_ASSET_PATH: /opt/ai_asset
       AIR_PLATFORM_PATH: /opt/air_platform
       VIEW_SQL_PATH: /opt/db_change_scripts
       AUTO_TESTING_PATH: /opt/auto_testing
       MULTICA_DAEMON_DEVICE_NAME: "Tester's Runtime on Container"
     volumes:
-      - view_code:/opt/tk
+      - view_code:/workspace
       - ai_asset:/opt/ai_asset
       - air_platform:/opt/air_platform
       - view_sql:/opt/db_change_scripts
@@ -354,7 +354,7 @@ docker compose exec leader opencode
 
 | 挂载项 | 说明 |
 | --- | --- |
-| `view_code:/opt/tk` | 多个角色共享同一份 VIEW 代码；宿主机路径由顶层 `volumes.view_code` 配置 |
+| `view_code:/workspace` | 多个角色共享同一份 VIEW 代码；宿主机路径由顶层 `volumes.view_code` 配置 |
 | `ai_asset:/opt/ai_asset` | 多个角色共享 AI Asset；宿主机路径由顶层 `volumes.ai_asset` 配置 |
 | `air_platform:/opt/air_platform` | 多个角色共享 AIR Platform；宿主机路径由顶层 `volumes.air_platform` 配置 |
 | `view_sql:/opt/db_change_scripts` | 多个角色共享 DB 变更脚本；宿主机路径由顶层 `volumes.view_sql` 配置 |

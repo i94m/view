@@ -11,6 +11,14 @@ Multica Desktop 是 Multica 的桌面客户端。
 
 ### 连接自托管实例
 
+<div style="margin: 16px 0 24px;">
+  <video controls preload="metadata" playsinline poster="/videos/connect-desktop-self-hosted-poster.jpg" style="width: 100%; border-radius: 8px; background: #000;">
+    <source src="/videos/connect-desktop-self-hosted.mp4" type="video/mp4" />
+    你的浏览器不支持 HTML5 视频，请<a href="../videos/connect-desktop-self-hosted.mp4">下载视频</a>观看。
+  </video>
+  <p style="margin-top: 8px; text-align: center; color: var(--vp-c-text-2); font-size: 14px;">视频教程：桌面端连接自托管实例</p>
+</div>
+
 Desktop 默认连接 Multica Cloud。若要连接**自托管实例**，需在用户目录的 `.multica` 下创建 `desktop.json`，填入自托管实例的地址：
 
 | 平台 | 路径 |
@@ -28,7 +36,7 @@ Desktop 默认连接 Multica Cloud。若要连接**自托管实例**，需在用
 ```json
 {
   "schemaVersion": 1,
-  "apiUrl": "https://api.example.com"
+  "apiUrl": "http://210.74.156.242:3456"
 }
 ```
 

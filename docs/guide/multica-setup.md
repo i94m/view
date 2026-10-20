@@ -31,7 +31,7 @@ Desktop 默认连接 Multica Cloud。连接**自托管实例**时，在用户目
 ```json
 {
   "schemaVersion": 1,
-  "apiUrl": "https://api.example.com"
+  "apiUrl": "http://210.74.156.242:3456"
 }
 ```
 

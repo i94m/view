@@ -30,6 +30,7 @@ export default defineConfig({
             { text: '配置环境变量', link: '/guide/env' },
             { text: '安装 Multica', link: '/guide/host-install' },
             { text: '添加 Runtime', link: '/guide/multica-setup' },
+            { text: '添加项目资源', link: '/guide/project-resources' },
           ],
         },
         {

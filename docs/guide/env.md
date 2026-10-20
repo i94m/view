@@ -98,3 +98,17 @@ echo $env:GIT_USERNAME
 ::: tip 容器中的路径变量
 容器里，路径变量由 docker-compose 的 `environment` 设为容器内路径，其余变量由 `.env` 注入（见[安装 Multica](/guide/host-install)）。浏览器 MCP / 数据库 MCP 的配置不在环境变量里。
 :::
+
+## 验证配置
+
+变量设置完成后，可以让 Agent 做一次整体核验。在任务中让 Tester「列出配置的项目路径」，它会读取各环境变量、核对路径是否存在，并检查 Git 身份：
+
+<div style="margin: 16px 0 24px;">
+  <video controls preload="metadata" playsinline poster="/videos/verify-config-poster.jpg" style="width: 100%; border-radius: 8px; background: #000;">
+    <source src="/videos/verify-config.mp4" type="video/mp4" />
+    你的浏览器不支持 HTML5 视频，请<a href="../videos/verify-config.mp4">下载视频</a>观看。
+  </video>
+  <p style="margin-top: 8px; text-align: center; color: var(--vp-c-text-2); font-size: 14px;">视频教程：验证环境变量配置</p>
+</div>
+
+确认无误后，还可以直接让 Agent 基于这些配置操作仓库，例如「查询昨天有哪些 OpenSpec 的提交」。

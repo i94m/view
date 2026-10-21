@@ -7,6 +7,8 @@ export default defineConfig({
   // 部署到子路径时改成 base: '/xxx/'（务必以 / 开头和结尾）
   base: '/docs/',
   cleanUrls: true,
+  // 文档里有大量指向本机环境的 http://localhost 链接，不是站点内部页面
+  ignoreDeadLinks: [/^http:\/\/localhost/],
   head: [['meta', { name: 'theme-color', content: '#3451b2' }]],
   markdown: {
     lineNumbers: true,
@@ -20,9 +22,25 @@ export default defineConfig({
     },
   },
   themeConfig: {
-    nav: [{ text: '指南', link: '/guide/opencode', activeMatch: '/guide/' }],
+    nav: [
+      { text: '指南', link: '/guide/opencode', activeMatch: '/guide/' },
+      { text: 'View 本地环境', link: '/view/', activeMatch: '/view/' },
+    ],
 
     sidebar: {
+      '/view/': [
+        {
+          text: 'View 本地环境',
+          items: [
+            { text: '本地环境', link: '/view/' },
+            { text: '介绍', link: '/view/info' },
+            { text: '基础命令', link: '/view/command' },
+            { text: 'IDE 配置 / Xdebug', link: '/view/ide' },
+            { text: '常见问题', link: '/view/question' },
+            { text: '在 Docker 中运行镜像', link: '/view/backup' },
+          ],
+        },
+      ],
       '/guide/': [
         {
           text: 'Multica',

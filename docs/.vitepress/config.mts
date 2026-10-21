@@ -9,7 +9,11 @@ export default defineConfig({
   cleanUrls: true,
   // 文档里有大量指向本机环境的 http://localhost 链接，不是站点内部页面
   ignoreDeadLinks: [/^http:\/\/localhost/],
-  head: [['meta', { name: 'theme-color', content: '#3451b2' }]],
+  head: [
+    ['meta', { name: 'theme-color', content: '#3451b2' }],
+    // href 不会被 VitePress 自动加 base，改 base 时这里要同步
+    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/docs/image/logo.svg' }],
+  ],
   markdown: {
     lineNumbers: true,
     image: { lazyLoad: true },
@@ -22,6 +26,9 @@ export default defineConfig({
     },
   },
   themeConfig: {
+    logo: { light: '/image/logo.svg', dark: '/image/logo.svg' },
+    socialLinks: [{ icon: 'github', link: 'https://github.com/i94m/view' }],
+
     nav: [
       { text: '指南', link: '/guide/opencode', activeMatch: '/guide/' },
       { text: 'View 本地环境', link: '/view/', activeMatch: '/view/' },

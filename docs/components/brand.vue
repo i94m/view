@@ -61,7 +61,7 @@ const option = reactive({
           lineDash: [0, 300],
           lineDashOffset: 0,
           fill: 'transparent',
-          stroke: 'white',
+          stroke: 'currentColor',
           lineWidth: 1
         },
         keyframeAnimation: {
@@ -86,7 +86,7 @@ const option = reactive({
             {
               percent: 1,
               style: {
-                fill: 'white'
+                fill: 'currentColor'
               }
             }
           ]
@@ -99,6 +99,14 @@ const option = reactive({
 const myChart = ref(null);
 
 const echartInit = () => {
+  // 原来写死 white，在白底页面基本看不见；这里跟随主题文字色（canvas 不认 currentColor）
+  const color =
+    getComputedStyle(document.documentElement).getPropertyValue('--vp-c-text-1').trim() ||
+    '#3c3c43';
+  const el = option.graphic.elements[0];
+  el.style.stroke = color;
+  el.keyframeAnimation.keyframes[2].style.fill = color;
+
   myChart.value = echarts.init(document.getElementById("chart"));
   updateChart();
 };

@@ -125,17 +125,17 @@ services:
     env_file: [.env]
     extra_hosts:
       - "git.ap.tkelevator.com:10.251.68.173"
-    working_dir: /opt/tk
+    working_dir: /workspace
     stdin_open: true
     tty: true
     environment:
-      VIEW_CODE_PATH: /opt/tk
+      VIEW_CODE_PATH: /workspace
       AI_ASSET_PATH: /opt/ai_asset
       AIR_PLATFORM_PATH: /opt/air_platform
       VIEW_SQL_PATH: /opt/db_change_scripts
       AUTO_TESTING_PATH: /opt/auto_testing
     volumes:
-      - /path/to/view:/opt/tk
+      - /path/to/view:/workspace
       - /path/to/asset:/opt/ai_asset
       - /path/to/air_platform:/opt/air_platform
       - /path/to/view_sql:/opt/db_change_scripts

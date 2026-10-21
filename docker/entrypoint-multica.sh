@@ -15,7 +15,7 @@ if [ -n "${GIT_USERNAME:-}" ] && [ -n "${GIT_PASSWORD:-}" ]; then
     > "${HOME}/.git-credentials" || true
 fi
 
-git config --global --add safe.directory "/opt/tk" 2>/dev/null || true
+git config --global --add safe.directory "/workspace" 2>/dev/null || true
 git config --global --add safe.directory "/opt/ai_asset" 2>/dev/null || true
 git config --global init.defaultBranch main 2>/dev/null || true
 
@@ -32,7 +32,7 @@ if [ "${MULTICA_DAEMON_AUTOSTART:-1}" != "0" ] && command -v multica >/dev/null 
   if [ -f "${HOME}/.multica/config.json" ]; then
     # 注意：如果 multica 的 cwd 位于工作目录根内，它会认为自己是
     # 「daemon 托管的任务」而拒绝执行 daemon start/status，
-    # 所以先切到中性目录（工作目录根默认是 /root/multica_workspaces，cwd 是 /opt/tk）。
+    # 所以先切到中性目录（工作目录根默认是 /root/multica_workspaces，cwd 是 /workspace）。
     cd / 2>/dev/null || cd "${HOME}" 2>/dev/null || true
     if multica daemon status 2>/dev/null | grep -q '^Daemon:[[:space:]]*running'; then
       echo "[entrypoint] multica daemon already running"

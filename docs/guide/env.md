@@ -8,7 +8,7 @@
 
 ```bash
 # 路径（项目代码位置）
-export VIEW_CODE_PATH="/workspace"
+export VIEW_CODE_PATH="/opt/tk"
 export AI_ASSET_PATH="/opt/ai_asset"
 export AIR_PLATFORM_PATH="/opt/air_platform"
 export VIEW_SQL_PATH="/opt/db_change_scripts"

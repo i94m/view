@@ -30,7 +30,7 @@ export default defineConfig({
     socialLinks: [{ icon: 'github', link: 'https://github.com/i94m/view' }],
 
     nav: [
-      { text: '指南', link: '/guide/opencode', activeMatch: '/guide/' },
+      { text: 'Multica', link: '/guide/opencode', activeMatch: '/guide/' },
       { text: 'View 本地环境', link: '/view/', activeMatch: '/view/' },
     ],
 

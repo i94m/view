@@ -16,6 +16,10 @@ opencode-data/
 sites/
 view_sql/
 
+# 例外：镜像构建上下文里的 apache 站点配置（否则会被上面的 sites/ 规则忽略）
+!docker/base/src/sites/
+!docker/base/src/sites/**
+
 # ---- 构建产物 / 日志 ----
 *.log
 .playwright-mcp/

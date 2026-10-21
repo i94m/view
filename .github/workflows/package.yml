@@ -73,6 +73,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Verify build context
+        run: |
+          set -e
+          # .gitignore 里的 sites/ 规则曾把 view.conf 排除，导致 CI 构建失败；这里提前兜底
+          test -f docker/base/src/sites/view.conf
+          test -f docker/base/src/php8.4_pdflib_nts_amd64.so
+          test -f docker/base/src/php8.4_pdflib_nts_arm64.so
+          test -f docker/base/src/init.sh
+          test -f docker/base/src/entrypoint.sh
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 

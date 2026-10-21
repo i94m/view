@@ -1,43 +1,52 @@
+# 在 Docker 中运行镜像
 
-## 在Docker中下载并运行View镜像
+不用 Docker Compose，直接用 `docker run` 起一个本地 View 环境容器（一个容器只跑一个环境）。
 
-1.打开一个终端窗口
+## 1. 拉取镜像
 
-2.使用下面的 `docker network create` 命令在Docker中创建类型为 `bridge` 的网络:
+```shell
+docker login ghcr.io      # 镜像包为私有，需要 GitHub PAT（勾 read:packages）
+docker pull ghcr.io/i94m/view:php8.4
+```
+
+## 2.（可选）创建固定 IP 的 bridge 网络
+
 ```shell
 docker network create --subnet=172.16.1.0/24 tke
 ```
 
-3.使用下面的 `docker run` 命令将其作为Docker中的容器运行:
+## 3. 启动容器
 
-Windows
-```shell
-docker run -d ^
-    --name view ^
-    --network tke ^
-    --ip 172.16.1.80 ^
-    --restart always ^
-    -p 80:80 ^
-    -v <本机local代码目录>:/home/tke/local ^
-    -v <本机preview代码目录>:/home/tke/preview ^
-    -v <本机dev2代码目录>:/home/tke/dev2 ^
-    -v <本机rc代码目录>:/home/tke/rc ^
-    -v <本机live代码目录>:/home/tke/live ^
-    rtwadewang/view:2.0.2
-```
+MacOS / Linux
 
-MacOS/Linux
 ```shell
 docker run -d \
-    --name view \
-    --network tke \
-    --ip 172.16.1.80 \
+    --name local \
     --restart always \
     -p 80:80 \
-    -v <本机local代码目录>:/home/tke/local \
-    -v <本机preview代码目录>:/home/tke/preview \
-    -v <本机dev2代码目录>:/home/tke/dev2 \
-    -v <本机rc代码目录>:/home/tke/rc \
-    -v <本机live代码目录>:/home/tke/live \
-    rtwadewang/view:2.0.2
+    -v <本机 View 代码目录>:/opt/tk \
+    -v <本机 sites 目录>:/opt/sites \
+    ghcr.io/i94m/view:php8.4
 ```
+
+Windows（CMD）
+
+```shell
+docker run -d ^
+    --name local ^
+    --restart always ^
+    -p 80:80 ^
+    -v <本机 View 代码目录>:/opt/tk ^
+    -v <本机 sites 目录>:/opt/sites ^
+    ghcr.io/i94m/view:php8.4
+```
+
+需要固定 IP 时补上 `--network tke --ip 172.16.1.80`。
+
+## 4. 初始化
+
+```shell
+docker exec -it local /run/init.sh <你的8ID>
+```
+
+初始化做了什么、之后怎么配置 hosts，见 [本地环境](/view/)。

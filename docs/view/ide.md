@@ -14,7 +14,7 @@
 
 ![](/image/view/ide/3.png)
 
-3.类型选择 `Docker` ，镜像名称选择 `rtwadewang/view`
+3.类型选择 `Docker` ，镜像名称选择 `ghcr.io/i94m/view:php8.4`
 
 ![](/image/view/ide/4.png)
 

@@ -1,18 +1,21 @@
 import { defineConfig } from 'vitepress'
 
+// 部署路径：本地/自建默认 /docs/；GitHub Pages 构建时由 workflow 传 DOCS_BASE=/view/
+// 必须以 / 开头和结尾。
+const base = process.env.DOCS_BASE || '/docs/'
+
 export default defineConfig({
   lang: 'zh-CN',
   title: 'TKE View',
   description: 'TKE VIEW 容器化开发环境与 multica AI 运行环境文档',
-  // 部署到子路径时改成 base: '/xxx/'（务必以 / 开头和结尾）
-  base: '/docs/',
+  base,
   cleanUrls: true,
   // 文档里有大量指向本机环境的 http://localhost 链接，不是站点内部页面
   ignoreDeadLinks: [/^http:\/\/localhost/],
   head: [
     ['meta', { name: 'theme-color', content: '#3451b2' }],
-    // href 不会被 VitePress 自动加 base，改 base 时这里要同步
-    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/docs/image/logo.svg' }],
+    // head 里的 href 不会被 VitePress 自动加 base，这里手动拼
+    ['link', { rel: 'icon', type: 'image/svg+xml', href: `${base}image/logo.svg` }],
   ],
   markdown: {
     lineNumbers: true,

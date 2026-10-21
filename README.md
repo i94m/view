@@ -57,10 +57,27 @@ docker compose (project: multica，bridge 网络 multica_net，默认子网 172.
 ```bash
 cd docs
 pnpm install
-pnpm dev        # 本地预览 http://localhost:5173
+pnpm dev        # 本地预览 http://localhost:5173/docs/
 pnpm build      # 构建到 docs/.vitepress/dist
 pnpm preview    # 预览构建产物
 ```
+
+### 自动发布
+
+push 到 `main` 且改动 `docs/**` 时，`.github/workflows/docs.yml` 会构建并发布到 GitHub Pages：
+
+**https://i94m.github.io/view/**
+
+首次使用需要在仓库 `Settings → Pages → Source` 选择 **GitHub Actions**。
+
+部署路径由 `DOCS_BASE` 控制（`base` 必须以 `/` 开头和结尾）：
+
+| 场景 | base | 地址 |
+| --- | --- | --- |
+| GitHub Pages（CI 自动设置） | `/view/` | https://i94m.github.io/view/ |
+| 本地 `pnpm dev` / 自建路径 | `/docs/`（默认） | http://localhost:5173/docs/ |
+
+自建部署可用 `DOCS_BASE=/some/path/ pnpm build` 覆盖。
 
 ## 前置要求
 

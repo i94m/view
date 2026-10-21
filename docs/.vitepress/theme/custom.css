@@ -472,3 +472,15 @@
     --vp-home-hero-image-background-image: linear-gradient(-45deg, #bd34fe 50%, #47caff 50%);
     --vp-home-hero-image-filter: blur(98px);
 }
+/**
+ * Fix: 带侧边栏的页面里，VPSidebar 是 position:fixed; top:0; z-index:60，
+ * 会把 z-index:30 的导航栏（含左上角 logo + 站点标题）盖住，导致标题看不见。
+ * 让侧边栏从导航栏下方开始，标题就能正常显示。
+ * -------------------------------------------------------------------------- */
+@media (min-width: 960px) {
+    /* 用 !important 覆盖 VitePress scoped 样式 .VPSidebar[data-v-xxx]（0,2,0）*/
+    .VPSidebar {
+        top: var(--vp-nav-height) !important;
+        height: calc(100vh - var(--vp-nav-height)) !important;
+    }
+}

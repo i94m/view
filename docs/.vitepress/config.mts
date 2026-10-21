@@ -34,13 +34,13 @@ export default defineConfig({
 
     nav: [
       { text: 'Multica', link: '/guide/opencode', activeMatch: '/guide/' },
-      { text: 'View 本地环境', link: '/view/', activeMatch: '/view/' },
+      { text: '开发环境', link: '/view/', activeMatch: '/view/' },
     ],
 
     sidebar: {
       '/view/': [
         {
-          text: 'View 本地环境',
+          text: '开发环境',
           items: [
             { text: '本地环境', link: '/view/' },
             { text: 'IDE 配置 / Xdebug', link: '/view/ide' },

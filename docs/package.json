@@ -2,7 +2,7 @@
   "name": "multica-runtime-docs",
   "version": "1.0.0",
   "private": true,
-  "description": "Multica AI Agents 文档站点（VitePress）",
+  "description": "TKE View 文档站点（VitePress）",
   "type": "module",
   "scripts": {
     "dev": "vitepress dev",

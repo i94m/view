@@ -2,8 +2,8 @@ import { defineConfig } from 'vitepress'
 
 export default defineConfig({
   lang: 'zh-CN',
-  title: 'Multica AI Agents',
-  description: 'TKE VIEW 的 multica 运行环境',
+  title: 'TKE View',
+  description: 'TKE VIEW 容器化开发环境与 multica AI 运行环境文档',
   // 部署到子路径时改成 base: '/xxx/'（务必以 / 开头和结尾）
   base: '/docs/',
   cleanUrls: true,

@@ -1,6 +1,6 @@
 ---
 layout: home
-title: Multica AI Agents · 容器化开发环境
+title: 容器化开发环境
 
 hero:
   image:

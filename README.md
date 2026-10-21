@@ -1,6 +1,6 @@
 # Multica Runtime
 
-TKE VIEW 的容器化 AI 开发运行环境。基于 `view:php8.4` 镜像，内置 Node.js 24、multica CLI、
+TKE VIEW 的容器化 AI 开发运行环境。基于自建的 `ghcr.io/i94m/view:php8.4` 基础镜像，内置 Node.js 24、multica CLI、
 opencode、openspec、uv（Python）与 MySQL MCP，用于在本地/服务器上运行 multica daemon
 托管的 agent 任务。
 
@@ -8,7 +8,7 @@ opencode、openspec、uv（Python）与 MySQL MCP，用于在本地/服务器上
 
 ```
 docker compose (project: multica，bridge 网络 multica_net，默认子网 172.16.10.0/24)
-└── runtime        view:php8.4-multica-runtime
+└── runtime        ghcr.io/i94m/view:php8.4-multica
     ├── apache / php-fpm (EXPOSE 80，映射到宿主 8080:80)
     ├── multica daemon (entrypoint 自启动)
     ├── opencode v2  (配置由使用者自行创建，见 docs/guide/opencode.md)
@@ -27,12 +27,17 @@ docker compose (project: multica，bridge 网络 multica_net，默认子网 172.
 
 ```
 .
-├── docker/                   # 构建镜像相关
-│   ├── Dockerfile            # 镜像定义（Node24 + git/git-lfs + multica/opencode/openspec + MySQL MCP）
-│   ├── entrypoint-multica.sh # 容器入口：配置 git 凭据 + 自启动 multica daemon
-│   ├── login.ts              # Playwright 登录辅助（构建时放入 /opt/playwright/）
-│   └── .dockerignore
-├── docker-compose.yml        # 运行编排：runtime
+├── docker/                        # 镜像构建（两个独立构建上下文）
+│   ├── base/                      # 基础镜像 → ghcr.io/i94m/view:php8.4
+│   │   ├── Dockerfile             #   debian13 + apache + php8.4 + pdflib
+│   │   └── src/                   #   php.ini / apache / xdebug / init.sh / pdflib .so
+│   ├── runtime/                   # 运行镜像 → ghcr.io/i94m/view:php8.4-multica
+│   │   ├── Dockerfile            #   base + Node24 + git-lfs + multica/opencode/openspec + MySQL MCP
+│   │   ├── entrypoint-multica.sh #   容器入口：配置 git 凭据 + 自启动 multica daemon
+│   │   └── login.ts              #   Playwright 登录辅助（构建时放入 /opt/playwright/）
+│   └── build.sh                   # 本地构建脚本（默认按本机架构 --load，不 push）
+├── .github/workflows/package.yml  # CI：多架构构建并推送 GHCR
+├── docker-compose.yml        # 运行编排：runtime（从 .example 复制）
 ├── .env.example              # 配置模板，复制为 .env 使用
 ├── .env                      # 实际配置（含密钥，已被 .gitignore 忽略）
 ├── docs/                     # VitePress 文档站点（本 README 的内容在这里）
@@ -60,7 +65,7 @@ pnpm preview    # 预览构建产物
 ## 前置要求
 
 - Docker + Docker Compose v2
-- 已构建/可拉取的 `registry.cn-hangzhou.aliyuncs.com/tke-view/view:php8.4-multica-runtime` 镜像
+- 已构建/可拉取的 `ghcr.io/i94m/view:php8.4-multica` 镜像（私有包需先 `docker login ghcr.io`）
 - 可访问 TKE 内网 Git、模型 API、multica server、MySQL
 
 > 镜像已内置 **multica 与 opencode v2**（及 openspec、uv、MySQL MCP），无需在宿主机或容器内另行安装。
@@ -108,16 +113,22 @@ Web 入口：apache 监听容器内 **80**，compose 映射到宿主 **8080**（
 
 ## 挂载卷
 
-数据与代码通过 bind mount 进容器，宿主路径**直接写在 `docker-compose.yml` 的 `volumes`**；
-对应的容器内路径由 `environment` 里的路径变量暴露给 opencode（`VIEW_CODE_PATH` 等）：
+数据与代码通过 bind mount 进容器。宿主路径用环境变量传入（默认值只是占位），
+可直接写在 `.env` 里；对应的容器内路径由 `environment` 里的路径变量暴露给 opencode（`VIEW_CODE_PATH` 等）：
 
-| 宿主路径（示例） | 容器路径 | 变量 / 用途 |
+```bash
+HOST_VIEW_PATH=/Users/you/tke/view
+HOST_ASSET_PATH=/Users/you/tke/asset
+# …
+```
+
+| 宿主路径（变量） | 容器路径 | 变量 / 用途 |
 | --- | --- | --- |
-| `/path/to/view` | `/opt/tk` | `VIEW_CODE_PATH`（VIEW 代码仓库 / 工作目录） |
-| `/path/to/asset` | `/opt/ai_asset` | `AI_ASSET_PATH`（AI Asset 仓库） |
-| `/path/to/air_platform` | `/opt/air_platform` | `AIR_PLATFORM_PATH`（AIR Platform 仓库） |
-| `/path/to/view_sql` | `/opt/db_change_scripts` | `VIEW_SQL_PATH`（DB 变更脚本） |
-| `/path/to/auto_testing` | `/opt/auto_testing` | `AUTO_TESTING_PATH`（自动化测试） |
+| `${HOST_VIEW_PATH}` | `/opt/tk` | `VIEW_CODE_PATH`（VIEW 代码仓库 / 工作目录） |
+| `${HOST_ASSET_PATH}` | `/opt/ai_asset` | `AI_ASSET_PATH`（AI Asset 仓库） |
+| `${HOST_AIR_PLATFORM_PATH}` | `/opt/air_platform` | `AIR_PLATFORM_PATH`（AIR Platform 仓库） |
+| `${HOST_VIEW_SQL_PATH}` | `/opt/db_change_scripts` | `VIEW_SQL_PATH`（DB 变更脚本） |
+| `${HOST_AUTO_TESTING_PATH}` | `/opt/auto_testing` | `AUTO_TESTING_PATH`（自动化测试） |
 | `./.multica` | `/root/.multica` | multica 登录态持久化 |
 | `./workspace` | `/root/multica_workspaces` | multica 任务工作目录 |
 | `./opencode` | `/root/.local/share/opencode` | opencode 数据 |
@@ -149,42 +160,66 @@ multica login --token <TOKEN>        # 手动登录
 
 ## 镜像构建
 
-必须用 `buildx`（BuildKit），否则 Dockerfile 的 `ARG TARGETARCH` 为空会导致构建失败。
-Dockerfile 支持 amd64 / arm64（`ARG TARGETARCH` 分支）。
+镜像分两层，各自有独立的构建上下文：
 
-同时构建 amd64 + arm64 并推送到 registry（多平台**不能** `--load`，必须 `--push`）：
+| 镜像 | 目录 | tag |
+| --- | --- | --- |
+| 基础镜像（debian13 + apache + php8.4 + pdflib） | `docker/base` | `ghcr.io/i94m/view:php8.4` |
+| 运行镜像（base + Node24 + multica/opencode/…） | `docker/runtime` | `ghcr.io/i94m/view:php8.4-multica` |
+
+### 日常：CI 自动构建
+
+push 到 `main` 后由 `.github/workflows/package.yml` 自动构建多架构（amd64 + arm64）并推送 GHCR：
+
+- 改了 `docker/base/**` → 重建 base，并连带重建 runtime
+- 只改 `docker/runtime/**` → 只重建 runtime（base 用现成 tag）
+- push `v*` tag 或手动 `workflow_dispatch` → 忽略路径过滤，两个都重建
+
+认证用 `GITHUB_TOKEN`（`permissions: packages: write`），**不需要配置任何 secret**。
+首次发布请先手动触发一次并勾选 `build_base`，否则 runtime 找不到 base。
+
+### 本地：只构建本机架构
 
 ```bash
-docker login registry.cn-hangzhou.aliyuncs.com
-docker buildx build --builder multiarch --platform linux/amd64,linux/arm64 \
-  --provenance=false --sbom=false \
-  -t registry.cn-hangzhou.aliyuncs.com/tke-view/view:php8.4-multica-runtime --push ./docker
+./docker/build.sh              # 按本机架构构建 base → runtime，--load 到本地
+./docker/build.sh --no-cache   # 忽略缓存
 ```
 
-> 构建上下文是 `docker/`（`Dockerfile` 与 `entrypoint-multica.sh`、`login.ts` 同目录）。
+> 默认**不** `--push`：单平台 push 会覆盖 CI 推出的双平台 manifest，另一种架构的同事就拉不到了。
+> 真要推多架构请用 `./docker/build.sh --platform linux/amd64,linux/arm64 --push`（arm64 Mac 上会走 QEMU，很慢）。
 
-> `--provenance=false --sbom=false` 必需：否则 BuildKit 会生成 attestation manifest，
-> aliyun ACR 会拒绝（`unknown manifest class for application/vnd.oci.empty.v1+json`）。
+也可以手动执行（本地用 `docker build`，它用当前 context 的 docker driver，能直接 `FROM` 本地已有的 base 镜像）：
 
-> `desktop-linux`（docker driver）不支持多平台，需用 `docker-container` driver 的 builder。
-> 若本机没有，先创建：
-> `docker buildx create --name multiarch --driver docker-container --use --bootstrap`
+```bash
+docker build --platform linux/arm64 -t ghcr.io/i94m/view:php8.4 docker/base
+docker build --platform linux/arm64 -t ghcr.io/i94m/view:php8.4-multica \
+  --build-arg BASE_IMAGE=ghcr.io/i94m/view:php8.4 docker/runtime
+```
 
-> 多平台构建在 arm64 Mac 上会用 QEMU 模拟 amd64。Dockerfile 已避免在构建期执行 Go/原生
+> 本地网络连不上 Docker Hub 时，加 `--build-arg BASE_OS=docker.m.daocloud.io/library/debian:13-slim`。
+
+> 需要 BuildKit（`DOCKER_BUILDKIT=1`，Docker 23+ 默认开启）：Dockerfile 依赖 `ARG TARGETARCH`
+> （pdflib / Node / multica 的架构分支）和 `--mount=type=cache`。多平台推送还需要 `docker-container`
+> driver 的 builder：`docker buildx create --name multiarch --driver docker-container --use --bootstrap`。
+
+> 多平台构建在 arm64 Mac 上会用 QEMU 模拟 amd64。runtime Dockerfile 已避免在构建期执行 Go/原生
 > 二进制（git-lfs 用 `apt-get download`+`dpkg-deb -x` 安装以跳过 postinst；`multica version`
-> 加了 `|| true`；opencode 用 `--ignore-scripts` 安装并手动接线平台二进制，因为其 postinstall
-> 会执行二进制自检），否则 QEMU 下会 segfault。Node/npm 自身在 QEMU 下正常。
+> 加了 `|| true`；opencode 用 `--ignore-scripts` 安装并手动接线平台二进制），否则 QEMU 下会 segfault。
 
-只构建单个架构并加载到本地（Apple Silicon 用 `linux/arm64` 为原生，避免 QEMU）：
+### 拉取镜像
+
+GHCR 包默认私有，二选一：
 
 ```bash
-docker buildx build --platform linux/arm64 \
-  -t registry.cn-hangzhou.aliyuncs.com/tke-view/view:php8.4-multica-runtime --load ./docker
+docker login ghcr.io          # 用 GitHub PAT（勾 read:packages）
+# 或在 GitHub → Packages → view → Settings 里把可见性改成 public
 ```
 
-关键构建参数（Dockerfile `ARG`，均可用 `--build-arg` 覆盖）：`NODE_VERSION`、`MULTICA_VERSION`、
-`OPENCODE_VERSION`、`MYSQL_MCP_VERSION`。opencode（v2，npm 包 `@opencode/cli`）与 multica、MySQL MCP
-均按固定版本安装，openspec 装最新版本。
+### 关键构建参数
+
+`docker/runtime/Dockerfile` 的 `ARG`（均可 `--build-arg` 覆盖）：`NODE_VERSION`、`MULTICA_VERSION`、
+`OPENCODE_VERSION`、`MYSQL_MCP_VERSION`、`OPENSPEC_VERSION`、`BASE_IMAGE`。
+所有版本均固定，构建可复现。
 
 ## 注意事项
 

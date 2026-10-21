@@ -1,4 +1,0 @@
-# Build context is this directory (docker/); keep it free of secrets/logs.
-.env*
-*.log
-.DS_Store

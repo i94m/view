@@ -1,0 +1,184 @@
+name: Package images
+
+# 构建并推送两个镜像（多架构）到 GHCR：
+#   ghcr.io/i94m/view:php8.4          ← docker/base/    （debian13 + apache + php8.4 + pdflib）
+#   ghcr.io/i94m/view:php8.4-multica  ← docker/runtime/ （base + Node24 + multica/opencode/…）
+#
+# 触发：
+#   - push main 且改动 docker/base/**        → 重建 base，并连带重建 runtime
+#   - push main 且改动 docker/runtime/**     → 只重建 runtime（base 直接用现成的 tag）
+#   - push tag v*                            → 忽略路径过滤，两个都重建（发版）
+#   - workflow_dispatch                      → 手动强制重建
+#
+# 认证：GITHUB_TOKEN + packages: write，无需任何自定义 secret。
+# 注意：base 必须先于 runtime 存在；首次发布请先手动跑一次（build_base=true）。
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      php_version:
+        description: PHP version (base image tag)
+        required: false
+        default: "8.4"
+      build_base:
+        description: 强制重建基础镜像
+        type: boolean
+        default: false
+      build_runtime:
+        description: 强制重建运行镜像
+        type: boolean
+        default: true
+
+concurrency:
+  group: package-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  IMAGE_NAME: ghcr.io/i94m/view
+  PLATFORMS: linux/amd64,linux/arm64
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      base: ${{ steps.filter.outputs.base }}
+      runtime: ${{ steps.filter.outputs.runtime }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            base:
+              - 'docker/base/**'
+              - '.github/workflows/package.yml'
+            runtime:
+              - 'docker/runtime/**'
+              - '.github/workflows/package.yml'
+
+  base:
+    needs: changes
+    if: |
+      needs.changes.outputs.base == 'true' ||
+      inputs.build_base ||
+      startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push base
+        uses: docker/build-push-action@v6
+        with:
+          context: docker/base
+          platforms: ${{ env.PLATFORMS }}
+          push: true
+          provenance: false
+          sbom: false
+          tags: |
+            ${{ env.IMAGE_NAME }}:php${{ inputs.php_version || '8.4' }}
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+          cache-from: type=gha,scope=base
+          cache-to: type=gha,mode=max,scope=base
+
+  runtime:
+    needs: [changes, base]
+    # base 被跳过（未改动）时也要构建 runtime，它直接拉 registry 里现成的 php8.4。
+    if: |
+      always() &&
+      (needs.base.result == 'success' || needs.base.result == 'skipped') &&
+      (needs.changes.outputs.runtime == 'true' ||
+       needs.changes.outputs.base == 'true' ||
+       inputs.build_runtime ||
+       inputs.build_base ||
+       startsWith(github.ref, 'refs/tags/v'))
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push runtime
+        uses: docker/build-push-action@v6
+        with:
+          context: docker/runtime
+          platforms: ${{ env.PLATFORMS }}
+          push: true
+          provenance: false
+          sbom: false
+          build-args: |
+            BASE_IMAGE=${{ env.IMAGE_NAME }}:php${{ inputs.php_version || '8.4' }}
+          tags: |
+            ${{ env.IMAGE_NAME }}:php${{ inputs.php_version || '8.4' }}-multica
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+          cache-from: type=gha,scope=runtime
+          cache-to: type=gha,mode=max,scope=runtime
+
+  # amd64 冒烟：确认 php/pdflib/apache/node/multica 都在位。
+  smoke:
+    needs: runtime
+    if: needs.runtime.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Smoke test (linux/amd64)
+        run: |
+          set -euo pipefail
+          IMG="${{ env.IMAGE_NAME }}:php${{ inputs.php_version || '8.4' }}-multica"
+          docker pull --platform linux/amd64 "$IMG"
+          docker run --rm --platform linux/amd64 "$IMG" bash -c '
+            set -e
+            php -v | head -1
+            php -m | grep -qx "PDFlib" && echo "pdflib: ok"
+            php -m | grep -qx "Zend OPcache" || true
+            apachectl -t
+            node -v
+            multica version >/dev/null 2>&1 || echo "multica version: skipped"
+            test -x /run/entrypoint.sh
+            test -x /run/entrypoint-multica.sh
+            test -f /opt/local/log4php_config.xml
+            test -d /var/log/php
+            test -d /var/log/View
+            test -d /var/log/SelfService
+          '
+          docker buildx imagetools inspect "$IMG" | sed -n '1,40p' >> "$GITHUB_STEP_SUMMARY"

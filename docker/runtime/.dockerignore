@@ -1,0 +1,4 @@
+# Build context is this directory (docker/runtime/); keep it free of secrets/logs.
+.env*
+*.log
+.DS_Store

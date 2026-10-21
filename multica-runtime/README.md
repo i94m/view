@@ -1,13 +1,14 @@
 # Multica Runtime
 
-镜像：`registry.cn-hangzhou.aliyuncs.com/tke-view/view:php8.4-multica-runtime`
+镜像：`ghcr.io/i94m/view:php8.4-multica`
 
 镜像已内置 **multica 与 opencode**（及 openspec、uv、MySQL MCP），无需另行安装。
 
 ## 运行
 
 ```bash
-cp .env.example .env      # 填 git 凭据；挂载路径在 docker-compose.yml 里填
+docker login ghcr.io                  # 私有包需要；已设为 public 可跳过
+cp .env.example .env                  # 填 git 凭据 + HOST_*_PATH 挂载路径
 docker compose up -d
 docker logs -f multica-runtime
 ```

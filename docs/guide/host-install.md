@@ -92,6 +92,13 @@ docker compose version
 在当前目录创建 `.env`，按需填写：
 
 ```dotenv
+# 宿主挂载路径（compose 里 ${HOST_*_PATH} 的取值，按本机实际路径填）
+HOST_VIEW_PATH=/path/to/view
+HOST_ASSET_PATH=/path/to/asset
+HOST_AIR_PLATFORM_PATH=/path/to/air_platform
+HOST_VIEW_SQL_PATH=/path/to/view_sql
+HOST_AUTO_TESTING_PATH=/path/to/auto_testing
+
 # Git 仓库地址（GIT_VIEW_CODE 供 entrypoint 推导 git host）
 GIT_VIEW_CODE=https://git.ap.tkelevator.com/VIEW/view_code.git
 GIT_AI_ASSET=https://git.ap.tkelevator.com/AI/AI_Asset.git
@@ -120,7 +127,7 @@ MULTICA_DAEMON_DEVICE_NAME="Your-Name's Runtime on Container"
 ```yaml{4,18-23}
 services:
   runtime:
-    image: registry.cn-hangzhou.aliyuncs.com/tke-view/view:php8.4-multica-runtime
+    image: ghcr.io/i94m/view:php8.4-multica
     container_name: multica-runtime
     env_file: [.env]
     extra_hosts:
@@ -134,11 +141,11 @@ services:
       VIEW_SQL_PATH: /opt/db_change_scripts
       AUTO_TESTING_PATH: /opt/auto_testing
     volumes:
-      - /path/to/view:/opt/tk
-      - /path/to/asset:/opt/ai_asset
-      - /path/to/air_platform:/opt/air_platform
-      - /path/to/view_sql:/opt/db_change_scripts
-      - /path/to/auto_testing:/opt/auto_testing
+      - ${HOST_VIEW_PATH}:/opt/tk
+      - ${HOST_ASSET_PATH}:/opt/ai_asset
+      - ${HOST_AIR_PLATFORM_PATH}:/opt/air_platform
+      - ${HOST_VIEW_SQL_PATH}:/opt/db_change_scripts
+      - ${HOST_AUTO_TESTING_PATH}:/opt/auto_testing
       - ./.multica:/root/.multica
       - ./workspace:/root/multica_workspaces
       - ./opencode-config:/root/.config/opencode
@@ -155,6 +162,13 @@ networks:
     ipam:
       config:
         - subnet: 172.16.10.0/24
+```
+
+### 拉取镜像
+
+```bash
+docker login ghcr.io      # 镜像包为私有，需要 GitHub PAT（勾 read:packages）；设为 public 后可不登录
+docker compose pull
 ```
 
 ### 启动

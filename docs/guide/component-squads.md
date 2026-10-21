@@ -145,7 +145,7 @@ docker compose exec tester bash
 ```yaml
 services:
   leader:
-    image: registry.cn-hangzhou.aliyuncs.com/tke-view/view:php8.4-multica-runtime
+    image: ghcr.io/i94m/view:php8.4-multica
     env_file: [.env]
     depends_on:
       - playwright
@@ -174,7 +174,7 @@ services:
     restart: unless-stopped
 
   developer:
-    image: registry.cn-hangzhou.aliyuncs.com/tke-view/view:php8.4-multica-runtime
+    image: ghcr.io/i94m/view:php8.4-multica
     env_file: [.env]
     depends_on:
       - playwright
@@ -203,7 +203,7 @@ services:
     restart: unless-stopped
 
   ba:
-    image: registry.cn-hangzhou.aliyuncs.com/tke-view/view:php8.4-multica-runtime
+    image: ghcr.io/i94m/view:php8.4-multica
     env_file: [.env]
     depends_on:
       - playwright
@@ -232,7 +232,7 @@ services:
     restart: unless-stopped
 
   tester:
-    image: registry.cn-hangzhou.aliyuncs.com/tke-view/view:php8.4-multica-runtime
+    image: ghcr.io/i94m/view:php8.4-multica
     env_file: [.env]
     depends_on:
       - playwright

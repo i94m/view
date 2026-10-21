@@ -1,4 +1,7 @@
-FROM registry.cn-hangzhou.aliyuncs.com/tke-view/view:php8.4
+# 基础镜像由本仓库的 docker/base/ 构建（见 .github/workflows/package.yml），
+# 默认取 CI 推送的 tag；本地可用 --build-arg BASE_IMAGE=... 覆盖。
+ARG BASE_IMAGE=ghcr.io/i94m/view:php8.4
+FROM ${BASE_IMAGE}
 
 LABEL author="rt.wadewang" \
       description="View php8.4 (debian-13) with Node.js 24 + multica / opencode / openspec / uv / MySQL MCP."
@@ -10,6 +13,7 @@ ARG NODE_VERSION=24.21.0
 ARG MULTICA_VERSION=0.6.5
 ARG OPENCODE_VERSION=2.1.0
 ARG MYSQL_MCP_VERSION=2.0.9
+ARG OPENSPEC_VERSION=1.14.3
 
 # 1) apt packages + git-lfs.
 #    git-lfs is extracted manually so its postinst (which execs the Go binary that
@@ -48,12 +52,12 @@ RUN set -eux; \
            /usr/local/CHANGELOG.md /usr/local/LICENSE; \
     node -v && npm -v
 
-# 3) global npm packages. openspec tracks latest; mcp-server-mysql pinned.
+# 3) global npm packages. 全部固定版本，保证构建可复现。
 #    Strip runtime-dead cruft: demo media, source maps (~90MB), markdown docs and
 #    TypeScript declarations (~16MB) — none are used when running the CLIs.
 RUN --mount=type=cache,target=/root/.npm \
     npm install -g \
-        "@fission-ai/openspec@latest" \
+        "@fission-ai/openspec@${OPENSPEC_VERSION}" \
         "@benborla29/mcp-server-mysql@${MYSQL_MCP_VERSION}" && \
     rm -f /usr/local/lib/node_modules/@benborla29/mcp-server-mysql/assets/*.gif && \
     find /usr/local/lib/node_modules -type f \

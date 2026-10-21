@@ -43,11 +43,8 @@ export default defineConfig({
           text: 'View 本地环境',
           items: [
             { text: '本地环境', link: '/view/' },
-            { text: '介绍', link: '/view/info' },
-            { text: '基础命令', link: '/view/command' },
             { text: 'IDE 配置 / Xdebug', link: '/view/ide' },
             { text: '常见问题', link: '/view/question' },
-            { text: '在 Docker 中运行镜像', link: '/view/backup' },
           ],
         },
       ],

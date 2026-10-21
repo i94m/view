@@ -113,7 +113,7 @@ Web 入口：apache 监听容器内 **80**，compose 映射到宿主 **8080**（
 
 | 宿主路径（示例） | 容器路径 | 变量 / 用途 |
 | --- | --- | --- |
-| `/path/to/view` | `/workspace` | `VIEW_CODE_PATH`（VIEW 代码仓库 / 工作目录，compose `working_dir`） |
+| `/path/to/view` | `/opt/tk` | `VIEW_CODE_PATH`（VIEW 代码仓库 / 工作目录） |
 | `/path/to/asset` | `/opt/ai_asset` | `AI_ASSET_PATH`（AI Asset 仓库） |
 | `/path/to/air_platform` | `/opt/air_platform` | `AIR_PLATFORM_PATH`（AIR Platform 仓库） |
 | `/path/to/view_sql` | `/opt/db_change_scripts` | `VIEW_SQL_PATH`（DB 变更脚本） |

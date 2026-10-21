@@ -15,7 +15,7 @@ if [ -n "${GIT_USERNAME:-}" ] && [ -n "${GIT_PASSWORD:-}" ]; then
     > "${HOME}/.git-credentials" || true
 fi
 
-git config --global --add safe.directory "/workspace" 2>/dev/null || true
+git config --global --add safe.directory "/opt/tk" 2>/dev/null || true
 git config --global --add safe.directory "/opt/ai_asset" 2>/dev/null || true
 git config --global init.defaultBranch main 2>/dev/null || true
 

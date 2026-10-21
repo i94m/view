@@ -111,23 +111,13 @@ RUN set -eux; \
 #    创建 opencode.json（见 docs/guide/opencode.md）。放在 /root 下，避开代码仓库挂载点。
 COPY entrypoint-multica.sh /run/entrypoint-multica.sh
 RUN chmod +x /run/entrypoint-multica.sh && \
-    mkdir -p /workspace /opt/ai_asset /root/.config/opencode
+    mkdir -p /opt/tk /workspace /opt/ai_asset /root/.config/opencode
 
 # Playwright login helper (reads VIEW_USERNAME / VIEW_PASSWORD).
 COPY login.ts /opt/playwright/login.ts
 
-# 基础镜像把 Apache DocumentRoot(/opt/tk/web)、PHP include_path、tk 用户家目录、以及
-# /run/init.sh 里的 $corePath 全部写死在 /opt/tk。本镜像的代码挂载点是 /workspace，
-# 所以这里把 /opt/tk 做成指向 /workspace 的符号链接（不是挂载点）：代码只挂到
-# /workspace，内置的 /opt/tk 路径经符号链接照常生效，不需要 sed 改写任何配置。
-RUN set -eux; \
-    if [ -d /opt/tk ] && [ ! -L /opt/tk ]; then \
-      rmdir /opt/tk || { echo "/opt/tk not empty, refusing to replace" >&2; ls -A /opt/tk; exit 1; }; \
-    fi; \
-    ln -s /workspace /opt/tk; \
-    test -L /opt/tk
-
-# 默认工作目录 = /workspace（VIEW 代码仓库的挂载点，进容器即落在这里）。
+# 默认工作目录 = /workspace（进容器的落脚目录；代码仓库仍挂载在 /opt/tk，与基础镜像
+# 的 Apache DocumentRoot / PHP include_path / tk 家目录保持一致）。
 # multica 的「任务工作目录」与 WORKDIR 无关：它固定用工作区根
 # $HOME/multica_workspaces（容器内 /root/multica_workspaces，compose 已挂载），
 # 可用 --workspaces-root / MULTICA_WORKSPACES_ROOT 覆盖。

@@ -122,7 +122,7 @@ Web 入口：apache 监听容器内 **80**，compose 映射到宿主 **8080**（
 | （登录） | 登录态存于 `./.multica/config.json`（挂载持久化），首次进容器 `multica login --token mul_xxx` |
 | `VIEW_USERNAME` | 自动登录邮箱（镜像自带的 `/opt/preview/web/login.php` 读取，对应 `user.Username`；Playwright 也用这个账号） |
 | `VIEW_PASSWORD` | Playwright 登录密码（`login.ts` 读取） |
-| `HOST_SITE_CONFIG` | 站点配置 `config.php` 的宿主路径，只读挂载到 `/opt/preview-config/config.php` |
+| `HOST_SITE_CONFIG` | 站点配置 `config.php` 的宿主路径，只读挂载到 `/opt/site-config.php` |
 | `MULTICA_SERVER_URL` | multica server 地址 |
 | `MULTICA_DAEMON_DEVICE_NAME` | multica daemon 设备名；单 runtime 容器 `.env` 中建议填 `"Your-Name's Runtime on Container"`；组件小队按成员在 compose 中分别配置 |
 
@@ -148,7 +148,7 @@ HOST_ASSET_PATH=/Users/you/tke/asset
 | `${HOST_AIR_PLATFORM_PATH}` | `/opt/air_platform` | `AIR_PLATFORM_PATH`（AIR Platform 仓库） |
 | `${HOST_VIEW_SQL_PATH}` | `/opt/db_change_scripts` | `VIEW_SQL_PATH`（DB 变更脚本） |
 | `${HOST_AUTO_TESTING_PATH}` | `/opt/auto_testing` | `AUTO_TESTING_PATH`（自动化测试） |
-| `${HOST_SITE_CONFIG}` | `/opt/preview-config/config.php`（只读） | 站点配置，启动时以 www-data 可读权限落到 `/opt/preview/config.php` |
+| `${HOST_SITE_CONFIG}` | `/opt/site-config.php`（只读） | 站点配置，启动时以 www-data 可读权限落到 `/opt/preview/config.php` |
 | `./.multica` | `/root/.multica` | multica 登录态持久化 |
 | `./workspace` | `/root/multica_workspaces` | multica 任务工作目录 |
 | `./opencode` | `/root/.local/share/opencode` | opencode 数据 |

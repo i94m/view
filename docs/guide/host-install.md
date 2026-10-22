@@ -147,7 +147,7 @@ services:
       - ${HOST_VIEW_SQL_PATH}:/opt/db_change_scripts
       - ${HOST_AUTO_TESTING_PATH}:/opt/auto_testing
       # 预览站点配置（只读，启动时落到 /opt/preview/config.php）
-      - ${HOST_SITE_CONFIG}:/opt/preview-config/config.php:ro
+      - ${HOST_SITE_CONFIG}:/opt/site-config.php:ro
       - ./.multica:/root/.multica
       - ./workspace:/root/multica_workspaces
       - ./opencode-config:/root/.config/opencode

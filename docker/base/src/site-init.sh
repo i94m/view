@@ -25,14 +25,14 @@
 #                                                    （否则 basePath 落回仓库，缓存会写脏 git）
 #   vivid/config/12.x/database.php                   注释 redis sentinel
 # 只建目录（内容由框架自己生成）：vivid/bootstrap/cache/12.x（viewApp 版本固定 12.x）
-# 只读挂载：/opt/preview-config/config.php（启动时以 www-data 可读权限落到 /opt/preview/config.php）
+# 只读挂载：/opt/site-config.php（启动时以 www-data 可读权限落到 /opt/preview/config.php）
 set -uo pipefail
 umask 022
 
 SITE=/opt/preview
 REPO=/opt/tk
 TPL=/opt/preview-tpl
-CONFIG_SRC=/opt/preview-config/config.php
+CONFIG_SRC=/opt/site-config.php
 
 # 需要落地真实文件（不软链）的路径
 REAL_PATHS=" vivid/public/index.php vivid/bootstrap/app.php vivid/config/12.x/database.php vivid/bootstrap/cache logs cache overrides config.php log4php_config.xml "
@@ -125,7 +125,7 @@ prepare_site() {
   elif [ -s "$SITE/config.php" ]; then
     log "config.php 已直接挂载"
   else
-    warn "未挂载 config.php：-v <sites>/<site>/config.php:/opt/preview-config/config.php:ro"
+    warn "未挂载 config.php：-v <sites>/<site>/config.php:/opt/site-config.php:ro"
   fi
 
   log "完成：DocumentRoot $SITE/web（软链 $(find "$SITE" -type l | wc -l | tr -d ' ') 个），仓库 $REPO 未写入"

@@ -43,8 +43,6 @@ export default defineConfig({
           text: '开发环境',
           items: [
             { text: '本地环境', link: '/view/' },
-            { text: 'IDE 配置 / Xdebug', link: '/view/ide' },
-            { text: '常见问题', link: '/view/question' },
           ],
         },
       ],

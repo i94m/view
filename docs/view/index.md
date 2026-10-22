@@ -6,7 +6,7 @@
 
 | 路径 | 说明 |
 | --- | --- |
-| `/opt/tk` | View 代码仓库（可只读挂载，镜像不会修改它） |
+| `/opt/tk` | View 代码仓库 |
 
 ## 使用 Docker run
 
@@ -18,7 +18,7 @@ docker run -d --name local --restart always \
   -p 80:80 ghcr.io/i94m/view:php8.4
 ```
 
-- `/opt/tk`：View 代码目录，加 `:ro` 也可以（镜像不写仓库）
+- `/opt/tk`：View 代码目录
 - `/opt/site-config.php`：站点配置，只读挂载（例如 `sites/hk/config.php`）
 - `VIEW_USERNAME`：自动登录用的邮箱，对应 `user` 表的 `Username` 字段
 
@@ -58,7 +58,7 @@ services:
       - D:/tke/sites/hk/config.php:/opt/site-config.php:ro
     ports:
       - "80:80"
-    restart: always
+    restart: unless-stopped
 ```
 
 在 `docker-compose.yml` 所在目录执行：
@@ -70,7 +70,5 @@ docker compose up -d
 访问 [http://localhost](http://localhost)；如果启动失败，先检查本机 80 端口是否被占用。
 
 ::: warning Windows / WSL
-Windows 下建议把项目目录设置为区分大小写模式，参考 [case-sensitivity](https://learn.microsoft.com/zh-cn/windows/wsl/case-sensitivity)。
-
 WSL 环境请把代码放在 Linux 文件系统里（例如 `/var/tke/dev`），参考 [Docker Desktop WSL 2 backend](https://docs.docker.com/desktop/windows/wsl/)。
 :::

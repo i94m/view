@@ -20,7 +20,7 @@ docker run -d --name local --restart always \
 
 - `/opt/tk`：View 代码目录
 - `/opt/site-config.php`：站点配置，只读挂载（例如 `sites/hk/config.php`）
-- `VIEW_USERNAME`：自动登录用的邮箱，对应 `user` 表的 `Username` 字段
+- `VIEW_USERNAME`：自动登录用的邮箱
 
 启动后访问 [http://localhost](http://localhost)。
 

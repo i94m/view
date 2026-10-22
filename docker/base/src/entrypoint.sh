@@ -4,9 +4,18 @@
 
 echo "Running on architecture: $(uname -m)"
 
+# 准备站点根 /opt/preview：仓库 /opt/tk 只读，镜像自带需要改动的文件。
+# 失败不阻塞启动（没挂代码时仍能用容器跑别的），只是站点不可用。
+if [ -x /run/site-init.sh ]; then
+    echo "[entrypoint] 准备站点根 /opt/preview（基于 /opt/tk）"
+    sudo -E /run/site-init.sh || echo "[entrypoint] site-init 失败，站点可能不可用" >&2
+fi
+
+# 注意：镜像默认 USER tk，特权操作走 sudo；-E 保留容器环境变量
+# （php-fpm 启动时要继承 VIEW_USERNAME 等，sudo 默认会清空环境）
 start_service() {
     local name=$1
-    if ! /etc/init.d/"${name}" start; then
+    if ! sudo -E /etc/init.d/"${name}" start; then
         echo "[entrypoint] 启动 ${name} 失败" >&2
         exit 1
     fi
@@ -40,4 +49,4 @@ for port in 80 9000; do
     fi
 done
 
-tail -f /var/log/apache2/error.log
+sudo tail -f /var/log/apache2/error.log

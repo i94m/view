@@ -10,14 +10,11 @@ hero:
   tagline: 长风破浪会有时，直挂云帆济沧海。
   actions:
     - theme: brand
-      text: 开发环境 ->
+      text: View 开发环境
       link: /view/
     - theme: alt
-      text: Multica 指南
-      link: /guide/opencode
-    - theme: alt
-      text: 安装 Runtime
-      link: /guide/host-install
+      text: Multica Agent
+      link: /guide/env
 ---
 
 <Brand></Brand>

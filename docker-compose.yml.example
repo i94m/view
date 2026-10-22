@@ -22,6 +22,8 @@ services:
       - ${HOST_AIR_PLATFORM_PATH:-/path/to/air_platform}:/opt/air_platform
       - ${HOST_VIEW_SQL_PATH:-/path/to/view_sql}:/opt/db_change_scripts
       - ${HOST_AUTO_TESTING_PATH:-/path/to/auto_testing}:/opt/auto_testing
+      # 预览站点配置（只读，启动时落到 /opt/preview/config.php）
+      - ${HOST_SITE_CONFIG:-/path/to/config.php}:/opt/preview-config/config.php:ro
       - ./.multica:/root/.multica
       - ./workspace:/root/multica_workspaces
       - ./opencode-config:/root/.config/opencode

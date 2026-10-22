@@ -2,10 +2,10 @@
 
 ## 1.执行php脚本时报错
 
-在运行php脚本如 `php sys/lib/test.php` 时会报错，这是因为这些脚本的代码中使用了类似 `$_ENV['HOME']` 的环境变量，所以需要使用 **特定用户** 进入容器。
+在运行 php 脚本如 `php sys/lib/test.php` 时会报错，这是因为这些脚本使用了类似 `$_ENV['HOME']` 的环境变量。基础镜像现在**默认就以 `tk` 用户运行**（`HOME=/opt/tk`），正常 `docker exec` 进去即可：
 <br><br>
 ```shell
-docker exec --user tk -it local bash
+docker exec -it local bash
 ```
 
 验证 `$HOME` 环境变量（输出 /opt/tk）

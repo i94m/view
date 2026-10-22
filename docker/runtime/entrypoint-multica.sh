@@ -10,13 +10,14 @@ GIT_HOST="${GIT_HOST:-git.ap.tkelevator.com}"
 # NOTE: passwords/tokens containing @ : / % must be URL-encoded; prefer an access token.
 if [ -n "${GIT_USERNAME:-}" ] && [ -n "${GIT_PASSWORD:-}" ]; then
   git config --global credential.helper store || true
-  umask 077
-  printf 'https://%s:%s@%s\n' "${GIT_USERNAME}" "${GIT_PASSWORD}" "${GIT_HOST}" \
-    > "${HOME}/.git-credentials" || true
+  # umask 只作用于凭据文件，不能泄漏给后面的 site-init（否则站点文件变 600，apache 403）
+  ( umask 077; printf 'https://%s:%s@%s\n' "${GIT_USERNAME}" "${GIT_PASSWORD}" "${GIT_HOST}" \
+      > "${HOME}/.git-credentials" ) || true
 fi
 
-git config --global --add safe.directory "/opt/tk" 2>/dev/null || true
-git config --global --add safe.directory "/opt/ai_asset" 2>/dev/null || true
+for d in /opt/tk /opt/ai_asset /opt/air_platform /opt/db_change_scripts /opt/auto_testing; do
+  git config --global --add safe.directory "$d" 2>/dev/null || true
+done
 git config --global init.defaultBranch main 2>/dev/null || true
 
 # ---------------------------------------------------------------------------

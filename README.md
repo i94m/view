@@ -1,21 +1,31 @@
 # Multica Runtime
 
-TKE VIEW 的容器化 AI 开发运行环境。基于自建的 `ghcr.io/i94m/view:php8.4` 基础镜像，内置 Node.js 24、multica CLI、
-opencode、openspec、uv（Python）与 MySQL MCP，用于在本地/服务器上运行 multica daemon
+TKE VIEW 的容器化开发 / AI 运行环境。`ghcr.io/i94m/view:php8.4` 提供 PHP 8.4 + Apache 的本地预览站点
+（仓库零改动，`/opt/preview` 自动生成）；`ghcr.io/i94m/view:php8.4-multica` 在其上内置 Node.js 24、
+multica CLI、opencode、openspec、uv（Python）与 MySQL MCP，用于在本地/服务器上运行 multica daemon
 托管的 agent 任务。
 
 ## 架构
 
 ```
-docker compose (project: multica，bridge 网络 multica_net，默认子网 172.16.10.0/24)
+docker compose (bridge 网络，默认子网 172.16.10.0/24)
 └── runtime        ghcr.io/i94m/view:php8.4-multica
     ├── apache / php-fpm (EXPOSE 80，映射到宿主 8080:80)
+    ├── 预览站点根 /opt/preview（启动时由 /run/site-init.sh 生成）
     ├── multica daemon (entrypoint 自启动)
     ├── opencode v2  (配置由使用者自行创建，见 docs/guide/opencode.md)
     ├── git + git-lfs (filter.lfs.* 已在镜像内配好)
     ├── uv / uvx (Python 包管理)
     └── MCP: Playwright / MySQL (均在 opencode.json 中定义)
 ```
+
+容器内项目统一放在 `/opt` 下（`tk`、`ai_asset`、`air_platform`、`db_change_scripts`、
+`auto_testing`）；其中 `/opt/tk` 同时是 `tk` 用户主目录、`WORKDIR` 与 PHP `include_path`。
+
+**站点根不在仓库里**：`/opt/preview` 在容器启动时自动生成——不需要改的条目软链回
+`/opt/tk`，需要改的少数文件（自动登录版 `login.php`、Laravel 的 `basePath` 锚点、
+注释掉 redis sentinel 的 `database.php`）由镜像提供或启动时生成。所以仓库可以只读挂载，
+`git status` 永远干净，也不需要再跑初始化脚本。
 
 `runtime` 接在 bridge 网络 `multica_net` 上，子网在 `docker-compose.yml` 里写死
 （`172.16.10.0/24`）。compose 把容器 80 端口映射到宿主 8080。
@@ -30,7 +40,7 @@ docker compose (project: multica，bridge 网络 multica_net，默认子网 172.
 ├── docker/                        # 镜像构建（两个独立构建上下文）
 │   ├── base/                      # 基础镜像 → ghcr.io/i94m/view:php8.4
 │   │   ├── Dockerfile             #   debian13 + apache + php8.4 + pdflib
-│   │   └── src/                   #   php.ini / apache / xdebug / init.sh / pdflib .so
+│   │   └── src/                   #   php.ini / apache / xdebug / site-init.sh / preview/ / pdflib .so
 │   ├── runtime/                   # 运行镜像 → ghcr.io/i94m/view:php8.4-multica
 │   │   ├── Dockerfile            #   base + Node24 + git-lfs + multica/opencode/openspec + MySQL MCP
 │   │   ├── entrypoint-multica.sh #   容器入口：配置 git 凭据 + 自启动 multica daemon
@@ -62,22 +72,8 @@ pnpm build      # 构建到 docs/.vitepress/dist
 pnpm preview    # 预览构建产物
 ```
 
-### 自动发布
-
-push 到 `main` 且改动 `docs/**` 时，`.github/workflows/docs.yml` 会构建并发布到 GitHub Pages：
-
-**https://i94m.github.io/view/**
-
-首次使用需要在仓库 `Settings → Pages → Source` 选择 **GitHub Actions**。
-
-部署路径由 `DOCS_BASE` 控制（`base` 必须以 `/` 开头和结尾）：
-
-| 场景 | base | 地址 |
-| --- | --- | --- |
-| GitHub Pages（CI 自动设置） | `/view/` | https://i94m.github.io/view/ |
-| 本地 `pnpm dev` / 自建路径 | `/docs/`（默认） | http://localhost:5173/docs/ |
-
-自建部署可用 `DOCS_BASE=/some/path/ pnpm build` 覆盖。
+站点路径固定为 `/docs/`（`docs/.vitepress/config.mts` 里的 `base`），构建产物放到任意静态服务器的
+`/docs/` 下即可访问。**不再发布到 GitHub Pages**（原 `docs.yml` 工作流已删除）。
 
 ## 前置要求
 
@@ -91,10 +87,13 @@ push 到 `main` 且改动 `docs/**` 时，`.github/workflows/docs.yml` 会构建
 
 ```bash
 cp .env.example .env
-# 编辑 .env 填 git 凭据；在 docker-compose.yml 里填挂载路径
+# 编辑 .env：git 凭据、HOST_*_PATH 挂载路径、HOST_SITE_CONFIG（站点 config.php）、VIEW_USERNAME（自动登录邮箱）
 docker compose up -d
 docker logs -f multica-runtime
 ```
+
+启动后预览站点即可访问（`http://127.0.0.1:8080`），不需要再执行任何初始化命令；
+`/opt/preview` 由 entrypoint 里的 `/run/site-init.sh` 生成，仓库不会被修改。
 
 镜像**不内置** opencode 的模型配置。**首次运行先给 opencode 配好模型服务**：
 
@@ -121,7 +120,9 @@ Web 入口：apache 监听容器内 **80**，compose 映射到宿主 **8080**（
 | `GIT_VIEW_CODE` | 用于推导 git host（`entrypoint-multica.sh`），缺省回退 `git.ap.tkelevator.com` |
 | `GIT_AI_ASSET` | 保留项，当前无脚本读取 |
 | （登录） | 登录态存于 `./.multica/config.json`（挂载持久化），首次进容器 `multica login --token mul_xxx` |
-| `VIEW_USERNAME` / `VIEW_PASSWORD` | Playwright 登录凭据（`login.ts` 读取） |
+| `VIEW_USERNAME` | 自动登录邮箱（镜像自带的 `/opt/preview/web/login.php` 读取，对应 `user.Username`；Playwright 也用这个账号） |
+| `VIEW_PASSWORD` | Playwright 登录密码（`login.ts` 读取） |
+| `HOST_SITE_CONFIG` | 站点配置 `config.php` 的宿主路径，只读挂载到 `/opt/preview-config/config.php` |
 | `MULTICA_SERVER_URL` | multica server 地址 |
 | `MULTICA_DAEMON_DEVICE_NAME` | multica daemon 设备名；单 runtime 容器 `.env` 中建议填 `"Your-Name's Runtime on Container"`；组件小队按成员在 compose 中分别配置 |
 
@@ -135,17 +136,19 @@ Web 入口：apache 监听容器内 **80**，compose 映射到宿主 **8080**（
 
 ```bash
 HOST_VIEW_PATH=/Users/you/tke/view
+HOST_SITE_CONFIG=/Users/you/tke/sites/hk/config.php
 HOST_ASSET_PATH=/Users/you/tke/asset
 # …
 ```
 
 | 宿主路径（变量） | 容器路径 | 变量 / 用途 |
 | --- | --- | --- |
-| `${HOST_VIEW_PATH}` | `/opt/tk` | `VIEW_CODE_PATH`（VIEW 代码仓库 / 工作目录） |
+| `${HOST_VIEW_PATH}` | `/opt/tk` | `VIEW_CODE_PATH`（VIEW 代码仓库 / 工作目录 / tk 主目录） |
 | `${HOST_ASSET_PATH}` | `/opt/ai_asset` | `AI_ASSET_PATH`（AI Asset 仓库） |
 | `${HOST_AIR_PLATFORM_PATH}` | `/opt/air_platform` | `AIR_PLATFORM_PATH`（AIR Platform 仓库） |
 | `${HOST_VIEW_SQL_PATH}` | `/opt/db_change_scripts` | `VIEW_SQL_PATH`（DB 变更脚本） |
 | `${HOST_AUTO_TESTING_PATH}` | `/opt/auto_testing` | `AUTO_TESTING_PATH`（自动化测试） |
+| `${HOST_SITE_CONFIG}` | `/opt/preview-config/config.php`（只读） | 站点配置，启动时以 www-data 可读权限落到 `/opt/preview/config.php` |
 | `./.multica` | `/root/.multica` | multica 登录态持久化 |
 | `./workspace` | `/root/multica_workspaces` | multica 任务工作目录 |
 | `./opencode` | `/root/.local/share/opencode` | opencode 数据 |
@@ -161,6 +164,7 @@ docker restart multica-runtime       # 重启（改完 opencode.json 后生效�
 docker logs -f multica-runtime       # 查看日志
 docker exec -it multica-runtime bash     # 进入容器
 docker exec -it multica-runtime opencode   # 打开 opencode（首次运行 /connect 配置模型）
+docker exec -it multica-runtime /run/init.sh   # 只重建 /opt/preview（切分支/重新拉代码后用，不写仓库）
 docker compose config                # 校验并查看解析后的配置
 ```
 
@@ -249,6 +253,16 @@ docker login ghcr.io          # 用 GitHub PAT（勾 read:packages）
 - **网络**：`runtime` 接在 bridge 网络 `multica_net`（子网在 `docker-compose.yml` 里写死）。
   在 macOS Docker Desktop 上，宿主 `ppp0` 的 VPN 路由**不会**进入容器，跨宿主/内网访问用
   `extra_hosts`。
+- **预览站点**：`/opt/preview` 每次容器启动都会重新生成（容器内临时目录，不持久化），
+  仓库保持零改动。日常改代码即时生效；只有「仓库根目录新增文件」或「在 `vivid/`、
+  `vivid/config/`、`vivid/config/12.x/`、`vivid/public/`、`vivid/bootstrap/` 下新增直接子项」，
+  以及 `git pull` 改到那两个 Laravel 锚点/`database.php` 时，需要重启容器或执行 `/run/init.sh`。
+- **自动登录**：站点登录页被镜像替换为自动登录版（`/login.php` 走 Apache Alias），
+  账号取环境变量 `VIEW_USERNAME`（邮箱）并在 `user` 表按 `Username` 查找。
+- **默认用户**：基础镜像默认以 `tk` 用户运行（`HOME=/opt/tk`，正好满足老代码里用
+  `$_ENV['HOME']` 定位代码目录的习惯；需要 root 的启动动作由 entrypoint 用
+  `sudo -E` 完成，`tk` 有免密 sudo）。multica 镜像则显式切回 `root`（daemon 与
+  `/root/.multica` 依赖 root），需要以 tk 身份执行命令时用 `docker exec -u tk ...`。
 - **multica 登录**：daemon 启动依赖 `./.multica/config.json`（挂载到 `/root/.multica`）；
   该文件不存在时 daemon 不会自启，需进容器手动 `multica login --token mul_xxx` 生成一次。
 - **工作目录**：multica 任务目录用其默认值 `$HOME/multica_workspaces`（容器内

@@ -8,10 +8,12 @@
 
 ```bash
 docker login ghcr.io                  # 私有包需要；已设为 public 可跳过
-cp .env.example .env                  # 填 git 凭据 + HOST_*_PATH 挂载路径
+cp .env.example .env                  # 填 git 凭据 + HOST_*_PATH 挂载路径 + HOST_SITE_CONFIG（站点 config.php）
 docker compose up -d
 docker logs -f multica-runtime
 ```
+
+启动后预览站点自动就绪（宿主 8080），`/opt/preview` 由容器启动时生成，不需要执行初始化脚本。
 
 ## 配置 opencode
 

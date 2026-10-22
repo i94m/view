@@ -7,7 +7,7 @@
 写进 `~/.zshrc` 或 `~/.bashrc`，改完 `source ~/.zshrc`（或重开终端）生效：
 
 ```bash
-# 路径（项目代码位置）
+# 路径（容器内固定为 /opt/*；在宿主机上运行 multica 时改成本机实际路径）
 export VIEW_CODE_PATH="/opt/tk"
 export AI_ASSET_PATH="/opt/ai_asset"
 export AIR_PLATFORM_PATH="/opt/air_platform"

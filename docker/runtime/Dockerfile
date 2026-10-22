@@ -3,6 +3,9 @@
 ARG BASE_IMAGE=ghcr.io/i94m/view:php8.4
 FROM ${BASE_IMAGE}
 
+# 基础镜像默认 USER tk（本地开发用），这里换回 root：daemon、安装、git 凭据都需要 root
+USER root
+
 LABEL author="rt.wadewang" \
       description="View php8.4 (debian-13) with Node.js 24 + multica / opencode / openspec / uv / MySQL MCP."
 
@@ -115,13 +118,16 @@ RUN set -eux; \
 #    创建 opencode.json（见 docs/guide/opencode.md）。放在 /root 下，避开代码仓库挂载点。
 COPY entrypoint-multica.sh /run/entrypoint-multica.sh
 RUN chmod +x /run/entrypoint-multica.sh && \
-    mkdir -p /opt/tk /workspace /opt/ai_asset /root/.config/opencode
+    mkdir -p /opt/tk /opt/ai_asset /opt/air_platform /opt/db_change_scripts /opt/auto_testing \
+             /workspace /root/.config/opencode
 
 # Playwright login helper (reads VIEW_USERNAME / VIEW_PASSWORD).
 COPY login.ts /opt/playwright/login.ts
 
-# 默认工作目录 = /workspace（进容器的落脚目录；代码仓库仍挂载在 /opt/tk，与基础镜像
-# 的 Apache DocumentRoot / PHP include_path / tk 家目录保持一致）。
+# 默认工作目录 = /workspace（进容器的落脚目录）。项目统一挂在 /opt 下：
+#   /opt/tk、/opt/ai_asset、/opt/air_platform、/opt/db_change_scripts、/opt/auto_testing
+# 代码仓库 /opt/tk 与基础镜像的 WORKDIR / PHP include_path / tk 家目录一致；
+# 预览站点根由基础镜像的 /run/site-init.sh 生成在 /opt/preview。
 # multica 的「任务工作目录」与 WORKDIR 无关：它固定用工作区根
 # $HOME/multica_workspaces（容器内 /root/multica_workspaces，compose 已挂载），
 # 可用 --workspaces-root / MULTICA_WORKSPACES_ROOT 覆盖。

@@ -1,8 +1,8 @@
 import { defineConfig } from 'vitepress'
 
-// 部署路径：本地/自建默认 /docs/；GitHub Pages 构建时由 workflow 传 DOCS_BASE=/view/
-// 必须以 / 开头和结尾。
-const base = process.env.DOCS_BASE || '/docs/'
+// 部署路径固定为 /docs/（必须以 / 开头和结尾）。站点由自建/本地静态服务器托管，
+// 不再发布到 GitHub Pages。
+const base = '/docs/'
 
 export default defineConfig({
   lang: 'zh-CN',

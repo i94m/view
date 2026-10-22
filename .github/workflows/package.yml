@@ -80,7 +80,8 @@ jobs:
           test -f docker/base/src/sites/view.conf
           test -f docker/base/src/php8.4_pdflib_nts_amd64.so
           test -f docker/base/src/php8.4_pdflib_nts_arm64.so
-          test -f docker/base/src/init.sh
+          test -f docker/base/src/site-init.sh
+          test -f docker/base/src/preview/web/login.php
           test -f docker/base/src/entrypoint.sh
 
       - name: Set up QEMU

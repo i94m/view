@@ -25,7 +25,8 @@ RUN useradd -m -d /opt/tk -s /bin/bash -c "TK User" tk && \
         memcached \
         redis-server \
         lsb-release \
-        apt-transport-https && \
+        apt-transport-https \
+        sudo && \
     update-ca-certificates && \
     ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
     echo "deb https://packages.sury.org/php $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list && \
@@ -80,6 +81,8 @@ RUN useradd -m -d /opt/tk -s /bin/bash -c "TK User" tk && \
     cp /etc/apache2/mods-available/proxy_fcgi.load /etc/apache2/mods-enabled/ && \
     cp /etc/apache2/mods-available/proxy.load /etc/apache2/mods-enabled/ && \
     rm /etc/apache2/sites-enabled/000-default.conf && \
+    echo 'tk ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/tk && \
+    chmod 0440 /etc/sudoers.d/tk && \
     apt-get autoremove --yes && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /root/.cache /opt/tk/composer-setup.php
@@ -101,18 +104,31 @@ COPY src/pdflib.ini /etc/php/8.4/fpm/conf.d/pdflib.ini
 COPY src/httpd.conf /etc/apache2/apache2.conf
 COPY src/sites /etc/apache2/sites-enabled/
 
-# 配置项目
+# 配置项目（镜像自带素材）
 COPY src/log4php_config.xml /opt/local/log4php_config.xml
 COPY src/redisconfig /opt/local/redisconfig
 
+# ---------- 站点根 ----------
+# DocumentRoot 是 /opt/preview。镜像自带需要改动的文件（自动登录版 login.php）放在
+# /opt/preview-tpl，由 /run/site-init.sh 在启动时铺到 /opt/preview，其余文件软链回
+# /opt/tk 代码仓库（新增文件不需要重建，见 site-init.sh 注释）。
+COPY src/preview/ /opt/preview-tpl/
+
+# /opt/preview 是预览站点根，entrypoint 的 site-init 每次启动重新生成（无需持久化）。
+RUN mkdir -p /opt/preview
+
 # ---------- init ----------
 COPY src/entrypoint.sh /run/entrypoint.sh
-COPY src/init.sh /run/init.sh
-RUN chmod +x /run/entrypoint.sh /run/init.sh
+COPY src/site-init.sh /run/site-init.sh
+RUN chmod +x /run/entrypoint.sh /run/site-init.sh && ln -sf /run/site-init.sh /run/init.sh
 
 # 健康检查：apache(80) 与 php-fpm(9000) 两个端口都通才算健康
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
     CMD bash -c 'exec 3<>/dev/tcp/127.0.0.1/80 && exec 3<>/dev/tcp/127.0.0.1/9000'
+
+# 默认以 tk 用户运行：很多老代码用 $_ENV['HOME']，tk 的 HOME 就是 /opt/tk（代码目录）。
+# 需要 root 的地方（启动 apache/php-fpm、生成站点根）由 entrypoint 里用 sudo 处理。
+USER tk
 
 CMD ["/run/entrypoint.sh"]
 EXPOSE 80

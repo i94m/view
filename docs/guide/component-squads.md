@@ -166,6 +166,7 @@ services:
       - air_platform:/opt/air_platform
       - view_sql:/opt/db_change_scripts
       - auto_testing:/opt/auto_testing
+      - ${HOST_SITE_CONFIG}:/opt/preview-config/config.php:ro
       - ./leader/.multica:/root/.multica
       - ./leader/workspace:/root/multica_workspaces
       - ./leader/opencode-config:/root/.config/opencode
@@ -195,6 +196,7 @@ services:
       - air_platform:/opt/air_platform
       - view_sql:/opt/db_change_scripts
       - auto_testing:/opt/auto_testing
+      - ${HOST_SITE_CONFIG}:/opt/preview-config/config.php:ro
       - ./developer/.multica:/root/.multica
       - ./developer/workspace:/root/multica_workspaces
       - ./developer/opencode-config:/root/.config/opencode
@@ -224,6 +226,7 @@ services:
       - air_platform:/opt/air_platform
       - view_sql:/opt/db_change_scripts
       - auto_testing:/opt/auto_testing
+      - ${HOST_SITE_CONFIG}:/opt/preview-config/config.php:ro
       - ./ba/.multica:/root/.multica
       - ./ba/workspace:/root/multica_workspaces
       - ./ba/opencode-config:/root/.config/opencode
@@ -253,6 +256,7 @@ services:
       - air_platform:/opt/air_platform
       - view_sql:/opt/db_change_scripts
       - auto_testing:/opt/auto_testing
+      - ${HOST_SITE_CONFIG}:/opt/preview-config/config.php:ro
       - ./tester/.multica:/root/.multica
       - ./tester/workspace:/root/multica_workspaces
       - ./tester/opencode-config:/root/.config/opencode

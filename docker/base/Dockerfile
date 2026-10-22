@@ -108,6 +108,16 @@ COPY src/sites /etc/apache2/sites-enabled/
 COPY src/log4php_config.xml /opt/local/log4php_config.xml
 COPY src/redisconfig /opt/local/redisconfig
 
+# Laravel 的 bootstrap 缓存（services / packages / config / events / routes）默认写在
+# basePath/bootstrap/cache 下；某些老页面会以仓库路径启动 Laravel，从而把缓存写回仓库。
+# 统一指到容器内临时目录，任何 PHP 进程（apache/php-fpm/CLI/agent）都不会再写仓库。
+ENV APP_SERVICES_CACHE=/tmp/view-cache/services.php \
+    APP_PACKAGES_CACHE=/tmp/view-cache/packages.php \
+    APP_CONFIG_CACHE=/tmp/view-cache/config.php \
+    APP_EVENTS_CACHE=/tmp/view-cache/events.php \
+    APP_ROUTES_CACHE=/tmp/view-cache/routes.php
+RUN mkdir -p /tmp/view-cache && chmod 777 /tmp/view-cache
+
 # ---------- 站点根 ----------
 # DocumentRoot 是 /opt/preview。镜像自带需要改动的文件（自动登录版 login.php）放在
 # /opt/preview-tpl，由 /run/site-init.sh 在启动时铺到 /opt/preview，其余文件软链回

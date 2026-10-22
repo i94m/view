@@ -2,7 +2,7 @@
 
 镜像：`ghcr.io/i94m/view:php8.4-multica`
 
-镜像已内置 **multica 与 opencode**（及 openspec、uv、MySQL MCP），无需另行安装。
+镜像已内置 **multica 与 opencode**（及 openspec、uv、MySQL MCP、python3/jq/ripgrep/tini），无需另行安装。
 
 ## 运行
 

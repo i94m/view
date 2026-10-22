@@ -70,7 +70,7 @@ iwr http://210.74.156.242:8008/multica/install.ps1 | iex
 用 docker compose 运行 multica runtime；下面所有命令都在 `docker-compose.yml` 所在目录执行。
 
 ::: tip 镜像已集成，无需另行安装
-镜像内含 **multica 与 opencode**（及 openspec、uv、MySQL MCP 等），宿主机只需装好 Docker / Docker Compose。
+镜像内含 **multica 与 opencode**（及 openspec、uv、MySQL MCP、python3/jq/ripgrep 等），宿主机只需装好 Docker / Docker Compose。
 :::
 
 连接自托管实例、启动 daemon 见 [添加 Runtime](/guide/multica-setup)。

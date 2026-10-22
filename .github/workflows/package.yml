@@ -185,6 +185,14 @@ jobs:
             apachectl -t
             node -v
             multica version >/dev/null 2>&1 || echo "multica version: skipped"
+            # 与 app/multica runtime 对齐的工具链（缺任何一个都算回归）
+            python3 -V
+            python -V
+            jq --version
+            rg --version >/dev/null
+            test -x /usr/bin/tini
+            command -v git-lfs
+            openspec --version || echo "openspec version: skipped"
             test -x /run/entrypoint.sh
             test -x /run/entrypoint-multica.sh
             test -f /opt/local/log4php_config.xml

@@ -7,10 +7,14 @@ FROM ${BASE_IMAGE}
 USER root
 
 LABEL author="rt.wadewang" \
-      description="View php8.4 (debian-13) with Node.js 24 + multica / opencode / openspec / uv / MySQL MCP."
+      description="View php8.4 (debian-13) with Node.js 24 + multica / opencode / openspec / uv / Python / MySQL MCP."
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG TARGETARCH
+
+# uv 在容器里默认 copy（跨挂载点硬链接会失败）；pip 版本检查提示在固定版本镜像里没有意义。
+ENV PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    UV_LINK_MODE=copy
 
 ARG NODE_VERSION=24.21.0
 ARG MULTICA_VERSION=0.6.5
@@ -22,12 +26,35 @@ ARG OPENSPEC_VERSION=1.14.3
 #    git-lfs is extracted manually so its postinst (which execs the Go binary that
 #    segfaults under QEMU emulation during multi-arch builds) is skipped; the LFS
 #    filters are written with plain `git config`.
+#    python3/tini/jq/rg 等与 app/multica 的 runtime 镜像保持能力对齐：agent 常用脚本
+#    （python、jq 解析、rg 搜索）以及 tini 作为 PID 1 回收僵尸进程。
+#    openssl / procps 基础镜像已有，不再重复安装。
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
     set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
-        curl xz-utils git openssh-client less vim; \
+        bash-completion \
+        curl \
+        dnsutils \
+        file \
+        git \
+        iproute2 \
+        iputils-ping \
+        jq \
+        less \
+        netcat-openbsd \
+        openssh-client \
+        python-is-python3 \
+        python3 \
+        python3-pip \
+        python3-venv \
+        ripgrep \
+        rsync \
+        tini \
+        unzip \
+        vim \
+        xz-utils; \
     cd /tmp; \
     apt-get download git-lfs; \
     dpkg-deb -x git-lfs_*.deb /; \
@@ -137,5 +164,9 @@ COPY login.ts /opt/playwright/login.ts
 WORKDIR /workspace
 
 # Overrides the base image CMD (base has no ENTRYPOINT); the wrapper execs /run/entrypoint.sh.
+# tini 作为 PID 1：容器内会拉起 apache/php-fpm/redis/memcached + multica daemon，
+# 没有 init 会留下僵死进程，且 docker stop 时信号无法正确转发。
+# 只把 tini 放 ENTRYPOINT，保留 CMD 可覆盖（docker run <img> bash 仍然是 shell）。
 # EXPOSE 80 is inherited.
+ENTRYPOINT ["/usr/bin/tini", "--"]
 CMD ["/run/entrypoint-multica.sh"]

@@ -3,7 +3,7 @@
 TKE VIEW 的容器化开发 / AI 运行环境。`ghcr.io/i94m/view:php8.4` 提供 PHP 8.4 + Apache 的本地预览站点
 （仓库零改动，`/opt/preview` 自动生成）；`ghcr.io/i94m/view:php8.4-multica` 在其上内置 Node.js 24、
 multica CLI、opencode、openspec、uv（Python）与 MySQL MCP，用于在本地/服务器上运行 multica daemon
-托管的 agent 任务。
+托管的 agent 任务。agent 常用工具（`python3`、`jq`、`ripgrep`、`tini` 等）已一并装好。
 
 ## 架构
 
@@ -81,7 +81,7 @@ pnpm preview    # 预览构建产物
 - 已构建/可拉取的 `ghcr.io/i94m/view:php8.4-multica` 镜像（私有包需先 `docker login ghcr.io`）
 - 可访问 TKE 内网 Git、模型 API、multica server、MySQL
 
-> 镜像已内置 **multica 与 opencode v2**（及 openspec、uv、MySQL MCP），无需在宿主机或容器内另行安装。
+> 镜像已内置 **multica 与 opencode v2**（及 openspec、uv、MySQL MCP、python3/jq/ripgrep/tini），无需在宿主机或容器内另行安装。
 
 ## 快速开始
 

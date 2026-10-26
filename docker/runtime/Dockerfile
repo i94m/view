@@ -125,15 +125,9 @@ RUN set -eux; \
       *) echo "unsupported arch: ${TARGETARCH}" >&2; exit 1 ;; \
     esac; \
     rm -f /tmp/multica.tar.gz /tmp/multica; \
-    for url in \
-      "https://ghfast.top/https://github.com/multica-ai/multica/releases/download/v${MULTICA_VERSION}/multica-cli-${MULTICA_VERSION}-linux-${MULTICA_ARCH}.tar.gz" \
+    curl --connect-timeout 15 --retry 3 --retry-delay 5 --retry-all-errors -fSL \
       "https://github.com/multica-ai/multica/releases/download/v${MULTICA_VERSION}/multica-cli-${MULTICA_VERSION}-linux-${MULTICA_ARCH}.tar.gz" \
-    ; do \
-      if curl --connect-timeout 15 --retry 3 --retry-delay 5 --retry-all-errors -fSL "$url" -o /tmp/multica.tar.gz; then \
-        break; \
-      fi; \
-      rm -f /tmp/multica.tar.gz; \
-    done; \
+      -o /tmp/multica.tar.gz; \
     test -s /tmp/multica.tar.gz; \
     tar -xzf /tmp/multica.tar.gz -C /tmp multica; \
     install -m 0755 /tmp/multica /usr/local/bin/multica; \

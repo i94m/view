@@ -25,7 +25,7 @@ PLATFORMS="linux/${HOST_ARCH}"
 PUSH=0
 CACHE_ARGS=()
 
-# 本地网络访问不了 Docker Hub 时，可 BASE_OS=docker.m.daocloud.io/library/debian:13-slim
+# 可选：用 BASE_OS 指定基础系统镜像
 BASE_OS_ARG=()
 if [ -n "${BASE_OS:-}" ]; then
     BASE_OS_ARG=(--build-arg "BASE_OS=${BASE_OS}")

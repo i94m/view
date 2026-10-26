@@ -1,5 +1,4 @@
-# 基础系统镜像。CI 用官方源；本地网络访问不了 Docker Hub 时可覆盖，例如：
-#   --build-arg BASE_OS=docker.m.daocloud.io/library/debian:13-slim
+# 基础系统镜像，统一用官方源（CI 在 GitHub 上构建，不需要任何镜像代理）。
 ARG BASE_OS=debian:13-slim
 FROM ${BASE_OS}
 
@@ -67,7 +66,7 @@ RUN useradd -m -d /opt/tk -s /bin/bash -c "TK User" tk && \
     else \
         echo "getcomposer.org 不可达，回退到 GitHub release"; \
         wget -O /usr/local/bin/composer \
-            "https://ghfast.top/https://github.com/composer/composer/releases/latest/download/composer.phar"; \
+            "https://github.com/composer/composer/releases/latest/download/composer.phar"; \
         chmod +x /usr/local/bin/composer; \
     fi && \
     composer --version && \

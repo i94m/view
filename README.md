@@ -217,7 +217,7 @@ docker build --platform linux/arm64 -t ghcr.io/i94m/view:php8.4-multica \
   --build-arg BASE_IMAGE=ghcr.io/i94m/view:php8.4 docker/runtime
 ```
 
-> 本地网络连不上 Docker Hub 时，加 `--build-arg BASE_OS=docker.m.daocloud.io/library/debian:13-slim`。
+> 构建过程只使用官方源（Debian、nodejs.org、github.com、packages.sury.org），不使用任何镜像代理。
 
 > 需要 BuildKit（`DOCKER_BUILDKIT=1`，Docker 23+ 默认开启）：Dockerfile 依赖 `ARG TARGETARCH`
 > （pdflib / Node / multica 的架构分支）和 `--mount=type=cache`。多平台推送还需要 `docker-container`

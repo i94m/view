@@ -25,12 +25,6 @@ PLATFORMS="linux/${HOST_ARCH}"
 PUSH=0
 CACHE_ARGS=()
 
-# 可选：用 BASE_OS 指定基础系统镜像
-BASE_OS_ARG=()
-if [ -n "${BASE_OS:-}" ]; then
-    BASE_OS_ARG=(--build-arg "BASE_OS=${BASE_OS}")
-fi
-
 while [ $# -gt 0 ]; do
     case "$1" in
         --push)      PUSH=1 ;;
@@ -58,7 +52,7 @@ fi
 echo ">> base    ${BASE_TAG}    (${PLATFORMS})"
 build \
     --platform "${PLATFORMS}" \
-    ${CACHE_ARGS[@]+"${CACHE_ARGS[@]}"} ${BASE_OS_ARG[@]+"${BASE_OS_ARG[@]}"} \
+    ${CACHE_ARGS[@]+"${CACHE_ARGS[@]}"} \
     -t "${BASE_TAG}" \
     "${BUILD_ROOT}/base"
 

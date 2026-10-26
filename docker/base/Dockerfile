@@ -1,6 +1,5 @@
-# 基础系统镜像，统一用官方源（CI 在 GitHub 上构建，不需要任何镜像代理）。
-ARG BASE_OS=debian:13-slim
-FROM ${BASE_OS}
+# 基础系统镜像固定用官方 debian（CI 在 GitHub 上构建，不使用任何镜像代理）。
+FROM debian:13-slim
 
 LABEL author="rt.wadewang"
 LABEL description="View local development environment (PHP 8.4)."

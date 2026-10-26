@@ -1,24 +1,18 @@
 ---
 layout: home
-title: 容器化开发环境
+title: View 本地开发环境
 
 hero:
   image:
     src: /image/hero.svg
     alt: logo
-  name: 容器化开发环境
-  tagline: 长风破浪会有时，直挂云帆济沧海。
+  name: View DevKit
+  tagline: View 与 Agent 开发环境，开箱即用。
   actions:
     - theme: brand
-      text: View 开发环境
+      text: 搭建 View 环境
       link: /view/
     - theme: alt
-      text: Multica Agent
+      text: 搭建 Multica 环境
       link: /guide/env
 ---
-
-<Brand></Brand>
-
-<script setup>
-import Brand from './components/brand.vue';
-</script>

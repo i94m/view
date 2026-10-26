@@ -31,6 +31,7 @@ docker run -d --name local --restart always \
 ```shell
 docker run -d --name china --restart always \
   -v D:/tke/local:/opt/tk \
+  # [!code focus]
   -v D:/tke/sites/china/config.php:/opt/site-config.php:ro \
   -e VIEW_USERNAME=you@example.com \
   -p 80:80 ghcr.io/i94m/view:php8.4
@@ -70,5 +71,5 @@ docker compose up -d
 访问 [http://localhost](http://localhost)；如果启动失败，先检查本机 80 端口是否被占用。
 
 ::: warning Windows / WSL
-WSL 环境请把代码放在 Linux 文件系统里（例如 `/var/tke/dev`），参考 [Docker Desktop WSL 2 backend](https://docs.docker.com/desktop/windows/wsl/)。
+WSL 环境请把代码放在 Linux 文件系统里（例如 `~/tke/dev`），不要放在 `/mnt/c/...`，参考 [Docker Desktop WSL 2 backend](https://docs.docker.com/desktop/windows/wsl/)。
 :::

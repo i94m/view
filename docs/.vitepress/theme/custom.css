@@ -484,3 +484,21 @@
         height: calc(100vh - var(--vp-nav-height)) !important;
     }
 }
+
+/**
+ * 侧边栏菜单标签（如「测试」），在 config.mts 的 sidebar text 里用
+ * `<span class="sidebar-badge">测试</span>` 插入。
+ * -------------------------------------------------------------------------- */
+.VPSidebarItem .sidebar-badge {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 0 6px;
+    border: 1px solid var(--vp-badge-warning-border);
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 16px;
+    color: var(--vp-badge-warning-text);
+    background-color: var(--vp-badge-warning-bg);
+    vertical-align: 1px;
+}

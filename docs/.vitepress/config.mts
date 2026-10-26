@@ -6,8 +6,8 @@ const base = '/docs/'
 
 export default defineConfig({
   lang: 'zh-CN',
-  title: 'TKE View',
-  description: 'TKE VIEW 容器化开发环境与 multica AI 运行环境文档',
+  title: 'View DevKit',
+  description: 'View DevKit：本地与容器开发环境，以及 Multica、OpenCode Agent 文档',
   base,
   cleanUrls: true,
   // 文档里有大量指向本机环境的 http://localhost 链接，不是站点内部页面
@@ -33,14 +33,14 @@ export default defineConfig({
     socialLinks: [{ icon: 'github', link: 'https://github.com/i94m/view' }],
 
     nav: [
-      { text: 'Multica', link: '/guide/opencode', activeMatch: '/guide/' },
-      { text: '开发环境', link: '/view/', activeMatch: '/view/' },
+      { text: 'View 开发环境', link: '/view/', activeMatch: '/view/' },
+      { text: 'Multica Agent', link: '/guide/opencode', activeMatch: '/guide/' },
     ],
 
     sidebar: {
       '/view/': [
         {
-          text: '开发环境',
+          text: 'View 开发环境',
           items: [
             { text: '本地环境', link: '/view/' },
           ],
@@ -67,7 +67,7 @@ export default defineConfig({
         {
           text: 'Agent 协作',
           items: [
-            { text: '组件小队', link: '/guide/component-squads' },
+            { text: '组件小队 <span class="sidebar-badge">测试</span>', link: '/guide/component-squads' },
           ],
         },
       ],

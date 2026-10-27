@@ -10,6 +10,7 @@ services:
       - "git.ap.tkelevator.com:10.251.68.173"
     stdin_open: true
     tty: true
+    working_dir: /opt/tk
     environment:
       VIEW_CODE_PATH: /opt/tk
       AI_ASSET_PATH: /opt/ai_asset

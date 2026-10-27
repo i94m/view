@@ -266,9 +266,12 @@ docker login ghcr.io          # 用 GitHub PAT（勾 read:packages）
   `/root/.multica` 依赖 root），需要以 tk 身份执行命令时用 `docker exec -u tk ...`。
 - **multica 登录**：daemon 启动依赖 `./.multica/config.json`（挂载到 `/root/.multica`）；
   该文件不存在时 daemon 不会自启，需进容器手动 `multica login --token mul_xxx` 生成一次。
-- **工作目录**：multica 任务目录用其默认值 `$HOME/multica_workspaces`（容器内
-  `/root/multica_workspaces`，已挂载 `./workspace`），与镜像 `WORKDIR /workspace` 无关；
+- **工作目录**：进容器的落脚目录由 compose 的 `working_dir: /opt/tk` 指定（覆盖镜像里的
+  `WORKDIR /workspace`，改它不用重建镜像），所以 `docker exec -it ... bash` 直接落在代码仓库根。
+  multica 任务目录则是另一个概念，固定用 `$HOME/multica_workspaces`（容器内
+  `/root/multica_workspaces`，已挂载 `./workspace`），与 `working_dir` 无关；
   可用 `MULTICA_WORKSPACES_ROOT` / `daemon start --workspaces-root` 覆盖。唯一约束是工作区根
-  不能是当前工作目录或包含当前工作目录，否则 multica 会拒绝 `daemon start/status`。
+  不能是当前工作目录或包含当前工作目录，否则 multica 会拒绝 `daemon start/status`
+  （`/opt/tk` 与 `/root/multica_workspaces` 互不包含，满足该约束）。
 - 更换部署机器时改 `docker-compose.yml` 里的挂载路径即可（`./.multica` 等相对路径无需改），
   并重建一次 `opencode.json`。

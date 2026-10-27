@@ -65,9 +65,9 @@ export default defineConfig({
           ],
         },
         {
-          text: 'Agent 协作',
+          text: '探索',
           items: [
-            { text: '组件小队 <span class="sidebar-badge">测试</span>', link: '/guide/component-squads' },
+            { text: 'Agent 小队 <span class="sidebar-badge">测试</span>', link: '/guide/squads' },
           ],
         },
       ],

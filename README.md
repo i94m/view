@@ -124,7 +124,7 @@ Web 入口：apache 监听容器内 **80**，compose 映射到宿主 **8080**（
 | `VIEW_PASSWORD` | Playwright 登录密码（`login.ts` 读取） |
 | `HOST_SITE_CONFIG` | 站点配置 `config.php` 的宿主路径，只读挂载到 `/opt/site-config.php` |
 | `MULTICA_SERVER_URL` | multica server 地址 |
-| `MULTICA_DAEMON_DEVICE_NAME` | multica daemon 设备名；单 runtime 容器 `.env` 中建议填 `"Your-Name's Runtime on Container"`；组件小队按成员在 compose 中分别配置 |
+| `MULTICA_DAEMON_DEVICE_NAME` | multica daemon 设备名；建议填 `"Your-Name's Runtime on Container"`；组件小队整队共用一个 runtime、一个设备名 |
 
 > Playwright / MySQL MCP（数据库连接）的配置**不在 `.env`**，而在容器内的
 > `opencode.json` 里直接填写，见 `docs/guide/opencode.md`。

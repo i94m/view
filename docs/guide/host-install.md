@@ -99,9 +99,8 @@ HOST_AIR_PLATFORM_PATH=/path/to/air_platform
 HOST_VIEW_SQL_PATH=/path/to/view_sql
 HOST_AUTO_TESTING_PATH=/path/to/auto_testing
 
-# Git 仓库地址（GIT_VIEW_CODE 供 entrypoint 推导 git host）
-GIT_VIEW_CODE=https://git.ap.tkelevator.com/VIEW/view_code.git
-GIT_AI_ASSET=https://git.ap.tkelevator.com/AI/AI_Asset.git
+# 预览站点配置（只读挂载到 /opt/site-config.php），一般填 sites/<site>/config.php
+HOST_SITE_CONFIG=/path/to/config.php
 
 # Git 身份 / 凭据（含 @ : / % 需 URL 编码）
 GIT_EMAIL=you@rayootech.com

@@ -1,6 +1,6 @@
 # 组件小队
 
-组件小队把 `leader`、`developer`、`ba`、`tester` 等角色做成**同一个 multica runtime 上的多个 Agent**，再用 multica 的 Squad 把它们组织起来。
+组件小队把 `Leader`、`Developer`、`BA` 等角色做成**同一个 multica runtime 上的多个 Agent**，再用 multica 的 Squad 把它们组织起来。
 
 整支小队只需要两个容器：
 
@@ -14,7 +14,7 @@
 适合以下场景：
 
 - 一个任务需要多个角色协作推进。
-- 多个 agent 同时访问同一份 VIEW / AI Asset / AIR Platform 代码和工具链。
+- 多个 Agent 同时访问同一份 VIEW / AI Asset / AIR Platform 代码和工具链。
 - 希望只维护一份登录态、模型配置与 MCP 配置。
 
 ::: tip
@@ -25,24 +25,24 @@
 
 - 宿主机已装好 Docker 与 Docker Compose v2。
 - 共享代码目录已存在；默认路径为 `/opt/view/dev`、`/opt/view/ai_asset`、`/opt/view/air_platform`、`/opt/view/view_sql`、`/opt/view/view_autotest_dev2`，如路径不同在 `.env` 里改。
+- 预览站点配置 `config.php` 已准备好（`HOST_SITE_CONFIG`）。不需要预览站点时，删掉 compose 里该挂载和 `ports` 即可。
 - 宿主机已准备 Playwright Chromium 缓存：`/root/.cache/ms-playwright/chromium-1208`。版本或路径不同时，同步修改 `playwright` 服务的 `volumes` 与 `--executable-path`。
 
 ## 组建步骤
 
-以下命令都在 `docker-compose.yml` 所在目录执行。
+以下 `docker compose` 命令都在 `docker-compose.yml` 所在目录执行。从第 6 步开始，`multica` 命令在容器内执行。
 
 ### 1. 规划小队成员
 
-先确定这次协作需要哪些角色。下面示例使用四个固定成员：
+先确定这次协作需要哪些角色。下面示例使用三个固定成员（BA 同时承担测试职责）：
 
 | 成员（Agent） | 建议职责 |
 | --- | --- |
 | `Leader` | 拆解任务、协调节奏、汇总结果 |
 | `Developer` | 代码实现、修复问题、整理变更 |
-| `BA` | 需求澄清、业务规则确认、验收口径整理 |
-| `Tester` | 测试验证、复现问题、整理测试结论 |
+| `BA` | 需求澄清、业务规则确认、验收口径整理，并承担测试验证与复现 |
 
-如果只需要两个或三个成员，少建几个 Agent 即可；需要更多角色，就按同样方式再加一个 Agent。
+如果只需要两个成员，少建一个 Agent 即可；需要更多角色，就按同样方式再加一个 Agent。
 
 ### 2. 准备共享代码与工具目录
 
@@ -55,6 +55,7 @@
 | `/opt/air_platform` | `HOST_AIR_PLATFORM_PATH` | AIR Platform 仓库 |
 | `/opt/db_change_scripts` | `HOST_VIEW_SQL_PATH` | DB 变更脚本 |
 | `/opt/auto_testing` | `HOST_AUTO_TESTING_PATH` | 自动化测试 |
+| `/opt/site-config.php` | `HOST_SITE_CONFIG` | 预览站点配置（只读） |
 
 ### 3. 配置 .env
 
@@ -66,10 +67,6 @@ HOST_AIR_PLATFORM_PATH=/path/to/air_platform
 HOST_VIEW_SQL_PATH=/path/to/view_sql
 HOST_AUTO_TESTING_PATH=/path/to/auto_testing
 HOST_SITE_CONFIG=/path/to/config.php
-
-# Git 仓库地址（GIT_VIEW_CODE 供 entrypoint 推导 git host）
-GIT_VIEW_CODE=https://git.ap.tkelevator.com/VIEW/view_code.git
-GIT_AI_ASSET=https://git.ap.tkelevator.com/AI/AI_Asset.git
 
 # Git 身份 / 凭据（含 @ : / % 需 URL 编码）
 GIT_EMAIL=you@rayootech.com
@@ -96,7 +93,6 @@ MULTICA_DAEMON_DEVICE_NAME="Example team's runtime"
 services:
   multica:
     image: ghcr.io/i94m/view:php8.4-multica
-    container_name: multica-runtime
     env_file: [.env]
     depends_on:
       - playwright
@@ -127,13 +123,10 @@ services:
       - ./playwright-output:/root/playwright-output:ro
     ports:
       - "8080:80"
-    networks:
-      - multica_net
     restart: unless-stopped
 
   playwright:
     image: mcr.microsoft.com/playwright/mcp:latest
-    container_name: playwright
     init: true
     # 以 root 运行：需要穿过 /root（0700）才能访问挂载进来的工作区
     user: "0:0"
@@ -161,20 +154,15 @@ services:
       - "0.0.0.0"
       - "--allowed-hosts"
       - "*"
-    networks:
-      - multica_net
     restart: unless-stopped
-
-networks:
-  multica_net:
-    driver: bridge
 ```
 
 说明：
 
-- `multica` 的容器名固定为 `multica-runtime`，后续 `docker exec` 都用这个名字。
+- `multica` 和 `playwright` 是 compose 里的服务名，不指定 `container_name`，容器名由 compose 自动生成（`<项目名>-multica-1`、`<项目名>-playwright-1`），不会和同机其它 runtime 容器冲突；后续统一用 `docker compose exec <服务名>` 进入。
 - 小队共用一套 `./.multica`、`./workspace`、`./opencode-config`、`./opencode-data`，登录和模型只配一次。
-- `playwright` 只在小队网络内提供 MCP（`http://playwright:8931/mcp`），不需要映射宿主机端口。
+- `playwright` 只提供容器网络内的 MCP 地址（`http://playwright:8931/mcp`），两个容器用 compose 默认网络即可互通，不需要映射宿主机端口。
+- `8080:80` 是预览站点入口（`http://127.0.0.1:8080`），只用于浏览器查看，可按需保留。
 
 ```bash
 docker compose config
@@ -186,12 +174,12 @@ docker compose up -d
 先配置 opencode 的模型服务：
 
 ```bash
-docker exec -it multica-runtime opencode
+docker compose exec multica opencode
 ```
 
 在界面里输入 `/connect`，按提示选择模型服务商、填入 API Key。
 
-浏览器 MCP 指向同一个 `playwright` 容器，写进 `./opencode-config/opencode.json`：
+浏览器 MCP 指向同一个 `playwright` 容器，写进 `./opencode-config/opencode.json`（已有配置文件时只合并 `mcp.servers.playwright`，不要整份覆盖）：
 
 ```json
 {
@@ -207,10 +195,14 @@ docker exec -it multica-runtime opencode
 }
 ```
 
+::: tip
+数据库 MCP 的配置见 [数据库 MCP](/guide/mcp-database)。所有 Agent 共用这一份 opencode 配置。
+:::
+
 然后连接 multica 自托管实例并启动 daemon：
 
 ```bash
-docker exec -it multica-runtime multica setup self-host \
+docker compose exec multica multica setup self-host \
   --server-url http://210.74.156.242:3456 \
   --app-url    http://210.74.156.242:3456
 ```
@@ -218,13 +210,19 @@ docker exec -it multica-runtime multica setup self-host \
 验证：
 
 ```bash
-docker exec -it multica-runtime multica daemon status
-docker exec -it multica-runtime multica runtime list
+docker compose exec multica multica daemon status
+docker compose exec multica multica runtime list
 ```
 
 `multica runtime list` 里会出现一个以 `MULTICA_DAEMON_DEVICE_NAME` 命名的 runtime，小队所有 Agent 都挂在这个 runtime 上。
 
 ### 6. 创建小队成员（Agent）
+
+先进入容器，下面的 `multica` 命令都在容器内执行：
+
+```bash
+docker compose exec multica bash
+```
 
 用 `multica runtime list` 拿到 runtime ID，然后为每个角色创建一个 Agent：
 
@@ -232,30 +230,25 @@ docker exec -it multica-runtime multica runtime list
 multica agent create --name Leader --runtime-id <runtime-id> \
   --description "小队负责人" \
   --instructions "拆解任务、协调节奏、汇总结果" \
-  --visibility workspace
+  --visibility workspace --max-concurrent-tasks 2
 
 multica agent create --name Developer --runtime-id <runtime-id> \
   --description "开发" \
   --instructions "代码实现、修复问题、整理变更" \
-  --visibility workspace
+  --visibility workspace --max-concurrent-tasks 2
 
 multica agent create --name BA --runtime-id <runtime-id> \
-  --description "业务分析" \
-  --instructions "需求澄清、业务规则确认、验收口径整理" \
-  --visibility workspace
-
-multica agent create --name Tester --runtime-id <runtime-id> \
-  --description "测试" \
-  --instructions "测试验证、复现问题、整理测试结论" \
-  --visibility workspace
+  --description "业务分析 / 测试" \
+  --instructions "需求澄清、业务规则确认、验收口径整理；负责测试验证、复现问题、整理测试结论" \
+  --visibility workspace --max-concurrent-tasks 2
 ```
 
-- `--visibility workspace` 让小队内其他成员也能调用这个 Agent；只希望自己调用时改成 `private`（默认）。
-- 不填 `--model` 时使用 runtime 默认模型，也就是上一步在 opencode 里配置的模型。
-- 并发受 `--max-concurrent-tasks`（默认 6）限制，多个成员同时跑任务时注意合计不要超过机器承受能力。
+- `--max-concurrent-tasks 2` 限制每个成员同时跑的任务数；三个成员合计最多 6 个，按机器配置调整（不填时每人默认 6）。
+- `--visibility workspace` 让工作区成员都能调用这个 Agent；只希望自己调用时改成 `private`（默认）。
+- 不填 `--model` 时使用 runtime 默认模型，也就是上一步在 opencode 里配置的模型；想给某个角色单独指定模型就加 `--model`。
 
 ::: tip
-也可以在 Multica 界面里选同一个 runtime 逐个新建 Agent，效果相同。
+也可以在 Multica 界面里选同一个 runtime 逐个新建 Agent，效果相同。宿主机装了 multica CLI 的话，也可以直接在宿主机执行这些命令，只要登录的是同一个 server 和 workspace。
 :::
 
 ### 7. 创建 Squad 并加入成员
@@ -267,12 +260,11 @@ multica squad create \
   --leader Leader
 ```
 
-返回结果里带有 squad ID，再逐个加入成员（Agent ID 用 `multica agent list` 查看）：
+返回结果里带有 squad ID（Leader 一般会自动加入成员名单，可用 `multica squad member list <squad-id>` 确认）。再逐个加入其他成员（Agent ID 用 `multica agent list` 查看）：
 
 ```bash
 multica squad member add <squad-id> --member-id <developer-agent-id> --role "开发"
-multica squad member add <squad-id> --member-id <ba-agent-id>        --role "需求"
-multica squad member add <squad-id> --member-id <tester-agent-id>    --role "测试"
+multica squad member add <squad-id> --member-id <ba-agent-id>        --role "需求 / 测试"
 ```
 
 确认名单：
@@ -285,13 +277,13 @@ multica squad member list <squad-id>
 
 在 Multica 里把任务派给 `Leader`，或直接发起给某个成员。Leader 按名单把子任务分派给其他 Agent，每个成员都在同一个 runtime 上执行，任务目录由 multica 自动分配。
 
-想调整某个角色的行为，直接更新 Agent 即可，不需要改 compose、也不需要重启容器：
+想调整某个角色的行为，直接更新 Agent 即可，不需要改 compose、也不需要重启容器（下一次任务会使用新配置）：
 
 ```bash
 multica agent update <agent-id> --instructions "新的职责说明"
 ```
 
-## 目录与隔离关系
+## 挂载与隔离关系
 
 | 挂载项 | 说明 |
 | --- | --- |
@@ -337,6 +329,13 @@ docker compose exec multica bash
 docker compose restart multica
 docker compose down
 ```
+
+- 容器日志里看不到 multica daemon 的输出：entrypoint 自启动的日志在 `/var/log/multica-daemon-boot.log`，daemon 自身的日志在 `/root/.multica/daemon.log`（对应宿主机 `./.multica/daemon.log`）。
+
+  ```bash
+  docker compose exec multica tail -f /var/log/multica-daemon-boot.log
+  docker compose exec multica tail -f /root/.multica/daemon.log
+  ```
 
 - 修改 `opencode-config` 后重启 `multica` 容器生效。
 - 重启 `multica` 会中断正在运行的任务，尽量挑空闲时间操作。

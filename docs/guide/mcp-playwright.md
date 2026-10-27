@@ -99,7 +99,7 @@ docker run -d -i --rm --init --pull=always \
 ::: info 说明
 - 官方镜像仅支持无头 Chromium。
 - 同一 docker 网络时用容器名：`http://playwright:8931/mcp`。
-- 不需要在 docker-compose 里做 Playwright 绑定，容器独立运行。
+- 单 runtime 场景可以让 Playwright 容器独立运行；用[组件小队](/guide/component-squads)时，它是 compose 里的 `playwright` 服务，随小队一起启动，不需要映射宿主机端口。
 :::
 
 官方文档：[Playwright MCP › Docker](https://github.com/microsoft/playwright-mcp#docker)。

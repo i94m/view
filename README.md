@@ -54,7 +54,8 @@ docker compose (bridge 网络，默认子网 172.16.10.0/24)
 ├── multica-runtime/          # 精简运行目录（仅 compose + .env.example + README）
 ├── .multica/                 # multica 登录态持久化（挂载到 /root/.multica）
 ├── workspace/                # multica 任务工作目录（挂载到 /root/multica_workspaces）
-├── opencode/                 # opencode 数据（挂载到 /root/.local/share/opencode）
+├── opencode-config/          # opencode 全局配置（挂载到 /root/.config/opencode）
+├── opencode-data/            # opencode 运行数据（挂载到 /root/.local/share/opencode）
 └── README.md
 ```
 
@@ -117,8 +118,7 @@ Web 入口：apache 监听容器内 **80**，compose 映射到宿主 **8080**（
 | 变量 | 说明 |
 | --- | --- |
 | `GIT_EMAIL` / `GIT_USERNAME` / `GIT_PASSWORD` | git 身份与凭据；密码含 `@ : / %` 需 URL 编码。entrypoint 会写入 `~/.git-credentials` |
-| `GIT_VIEW_CODE` | 用于推导 git host（`entrypoint-multica.sh`），缺省回退 `git.ap.tkelevator.com` |
-| `GIT_AI_ASSET` | 保留项，当前无脚本读取 |
+| `GIT_VIEW_CODE` | 可选：仅当 Git 主机不是 `git.ap.tkelevator.com` 时用于推导 git host（`entrypoint-multica.sh`），缺省回退该地址 |
 | （登录） | 登录态存于 `./.multica/config.json`（挂载持久化），首次进容器 `multica login --token mul_xxx` |
 | `VIEW_USERNAME` | 自动登录邮箱（站点登录页读取；Playwright 也用这个账号） |
 | `VIEW_PASSWORD` | Playwright 登录密码（`login.ts` 读取） |
@@ -151,7 +151,8 @@ HOST_ASSET_PATH=/Users/you/tke/asset
 | `${HOST_SITE_CONFIG}` | `/opt/site-config.php`（只读） | 站点配置，启动时以 www-data 可读权限落到 `/opt/preview/config.php` |
 | `./.multica` | `/root/.multica` | multica 登录态持久化 |
 | `./workspace` | `/root/multica_workspaces` | multica 任务工作目录 |
-| `./opencode` | `/root/.local/share/opencode` | opencode 数据 |
+| `./opencode-config` | `/root/.config/opencode` | opencode 全局配置（模型、MCP 等） |
+| `./opencode-data` | `/root/.local/share/opencode` | opencode 运行数据 |
 
 > 相对路径（`./.multica`、`./opencode-data` 等）相对于 `docker-compose.yml` 所在处。
 

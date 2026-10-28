@@ -10,7 +10,7 @@ GIT_HOST="${GIT_HOST:-git.ap.tkelevator.com}"
 # NOTE: passwords/tokens containing @ : / % must be URL-encoded; prefer an access token.
 if [ -n "${GIT_USERNAME:-}" ] && [ -n "${GIT_PASSWORD:-}" ]; then
   git config --global credential.helper store || true
-  # umask 只作用于凭据文件，不能泄漏给后面的 site-init（否则站点文件变 600，apache 403）
+  # umask 只作用于凭据文件，不能泄漏给后面的 site-init（否则站点文件变 600，nginx 403）
   ( umask 077; printf 'https://%s:%s@%s\n' "${GIT_USERNAME}" "${GIT_PASSWORD}" "${GIT_HOST}" \
       > "${HOME}/.git-credentials" ) || true
 fi
@@ -46,5 +46,5 @@ if [ "${MULTICA_DAEMON_AUTOSTART:-1}" != "0" ] && command -v multica >/dev/null 
   fi
 fi
 
-# Hand over to the base image entrypoint (apache / php-fpm / redis / memcached).
+# Hand over to the base image entrypoint (nginx / php-fpm / redis / memcached).
 exec /run/entrypoint.sh

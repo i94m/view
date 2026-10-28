@@ -1,6 +1,6 @@
 # 本地环境 <Badge type="tip" text="php8.4" />
 
-容器内是 `apache` + `php-fpm`，每个容器加载一份站点配置（只读挂载的 `/opt/site-config.php`）；需要同时跑多个环境时，建多个容器、各自挂不同的站点配置即可。
+容器内是 `nginx` + `php-fpm`，每个容器加载一份站点配置（只读挂载的 `/opt/site-config.php`）；需要同时跑多个环境时，建多个容器、各自挂不同的站点配置即可。
 
 容器默认以 `tk` 用户运行（`HOME=/opt/tk`），老代码里用 `$_ENV['HOME']` 定位代码目录的行为可以直接生效；需要 root 时用 `sudo`（免密）。
 

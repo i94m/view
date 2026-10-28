@@ -158,7 +158,7 @@ COPY login.ts /opt/playwright/login.ts
 WORKDIR /workspace
 
 # Overrides the base image CMD (base has no ENTRYPOINT); the wrapper execs /run/entrypoint.sh.
-# tini 作为 PID 1：容器内会拉起 apache/php-fpm/redis/memcached + multica daemon，
+# tini 作为 PID 1：容器内会拉起 nginx/php-fpm/redis/memcached + multica daemon，
 # 没有 init 会留下僵死进程，且 docker stop 时信号无法正确转发。
 # 只把 tini 放 ENTRYPOINT，保留 CMD 可覆盖（docker run <img> bash 仍然是 shell）。
 # EXPOSE 80 is inherited.

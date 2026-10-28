@@ -1,7 +1,7 @@
 name: Package images
 
 # 构建并推送两个镜像（多架构）到 GHCR：
-#   ghcr.io/i94m/view:php8.4          ← docker/base/    （debian13 + apache + php8.4 + pdflib）
+#   ghcr.io/i94m/view:php8.4          ← docker/base/    （debian13 + nginx + php8.4 + pdflib）
 #   ghcr.io/i94m/view:php8.4-multica  ← docker/runtime/ （base + Node24 + multica/opencode/…）
 #
 # 触发：
@@ -76,8 +76,8 @@ jobs:
       - name: Verify build context
         run: |
           set -e
-          # .gitignore 里的 sites/ 规则曾把 view.conf 排除，导致 CI 构建失败；这里提前兜底
-          test -f docker/base/src/sites/view.conf
+          # 构建上下文里的关键文件缺失时尽早失败（曾因 .gitignore 的 sites/ 规则把 view.conf 排除掉）
+          test -f docker/base/src/nginx/nginx.conf
           test -f docker/base/src/php8.4_pdflib_nts_amd64.so
           test -f docker/base/src/php8.4_pdflib_nts_arm64.so
           test -f docker/base/src/site-init.sh
@@ -159,7 +159,7 @@ jobs:
           cache-from: type=gha,scope=runtime
           cache-to: type=gha,mode=max,scope=runtime
 
-  # amd64 冒烟：确认 php/pdflib/apache/node/multica 都在位。
+  # amd64 冒烟：确认 php/pdflib/nginx/node/multica 都在位。
   smoke:
     needs: runtime
     if: needs.runtime.result == 'success'
@@ -182,7 +182,8 @@ jobs:
             php -v | head -1
             php -m | grep -qx "PDFlib" && echo "pdflib: ok"
             php -m | grep -qx "Zend OPcache" || true
-            apachectl -t
+            # 镜像默认 USER tk：nginx -t 要写 /run/nginx.pid，必须走 sudo
+            sudo nginx -t
             node -v
             multica version >/dev/null 2>&1 || echo "multica version: skipped"
             # 与 app/multica runtime 对齐的工具链（缺任何一个都算回归）

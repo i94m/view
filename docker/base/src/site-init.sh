@@ -19,7 +19,7 @@
 #
 # 镜像自带（/opt/preview-tpl）：
 #   web/login.php           自动登录版 login（邮箱取环境变量 VIEW_USERNAME → user.Username）
-#                           → 通过 Apache Alias /login.php 生效，不往 docroot 塞文件
+#                           → 通过 nginx location = /login.php 生效，不往 docroot 塞文件
 # 从仓库复制 / 改写（启动时生成）：
 #   vivid/public/index.php、vivid/bootstrap/app.php   Laravel 的 basePath 锚点
 #                                                    （否则 basePath 落回仓库，缓存会写脏 git）
@@ -88,7 +88,7 @@ prepare_site() {
   link_tree ""
 
   # ---- 3. 镜像自带的文件 ----
-  cp -f "$TPL/web/login.php" "$SITE/overrides/login.php"      # Apache Alias /login.php 用
+  cp -f "$TPL/web/login.php" "$SITE/overrides/login.php"      # nginx location = /login.php 用
   cp -f /opt/local/log4php_config.xml "$SITE/log4php_config.xml"
 
   # ---- 4. Laravel 缓存目录：只要目录骨架，内容由框架自己生成 ----
@@ -109,7 +109,7 @@ prepare_site() {
         "$REPO/vivid/config/12.x/database.php" > "$SITE/vivid/config/12.x/database.php"
   fi
 
-  # ---- 7. 权限：apache / php-fpm 以 www-data 运行，运行期目录必须可写 ----
+  # ---- 7. 权限：nginx / php-fpm 以 www-data 运行，运行期目录必须可写 ----
   chown -R www-data:www-data \
     "$SITE/vivid/bootstrap/cache" "$SITE/logs" "$SITE/cache" 2>/dev/null || true
   chmod -R u+rwX,g+rwX "$SITE/vivid/bootstrap/cache" "$SITE/logs" "$SITE/cache" 2>/dev/null || true

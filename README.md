@@ -1,6 +1,6 @@
 # Multica Runtime
 
-TKE VIEW 的容器化开发 / AI 运行环境。`ghcr.io/i94m/view:php8.4` 提供 PHP 8.4 + Apache 的本地预览站点
+TKE VIEW 的容器化开发 / AI 运行环境。`ghcr.io/i94m/view:php8.4` 提供 PHP 8.4 + nginx 的本地预览站点
 （仓库零改动，`/opt/preview` 自动生成）；`ghcr.io/i94m/view:php8.4-multica` 在其上内置 Node.js 24、
 multica CLI、opencode、openspec、uv（Python）与 MySQL MCP，用于在本地/服务器上运行 multica daemon
 托管的 agent 任务。agent 常用工具（`python3`、`jq`、`ripgrep`、`tini` 等）已一并装好。
@@ -10,7 +10,7 @@ multica CLI、opencode、openspec、uv（Python）与 MySQL MCP，用于在本�
 ```
 docker compose (bridge 网络，默认子网 172.16.10.0/24)
 └── runtime        ghcr.io/i94m/view:php8.4-multica
-    ├── apache / php-fpm (EXPOSE 80，映射到宿主 8080:80)
+    ├── nginx / php-fpm (EXPOSE 80，映射到宿主 8080:80)
     ├── 预览站点根 /opt/preview（启动时由 /run/site-init.sh 生成）
     ├── multica daemon (entrypoint 自启动)
     ├── opencode v2  (配置由使用者自行创建，见 docs/guide/opencode.md)
@@ -39,8 +39,8 @@ docker compose (bridge 网络，默认子网 172.16.10.0/24)
 .
 ├── docker/                        # 镜像构建（两个独立构建上下文）
 │   ├── base/                      # 基础镜像 → ghcr.io/i94m/view:php8.4
-│   │   ├── Dockerfile             #   debian13 + apache + php8.4 + pdflib
-│   │   └── src/                   #   php.ini / apache / xdebug / site-init.sh / preview/ / pdflib .so
+│   │   ├── Dockerfile             #   debian13 + nginx + php8.4 + pdflib
+│   │   └── src/                   #   php.ini / nginx / xdebug / site-init.sh / preview/ / pdflib .so
 │   ├── runtime/                   # 运行镜像 → ghcr.io/i94m/view:php8.4-multica
 │   │   ├── Dockerfile            #   base + Node24 + git-lfs + multica/opencode/openspec + MySQL MCP
 │   │   ├── entrypoint-multica.sh #   容器入口：配置 git 凭据 + 自启动 multica daemon
@@ -111,7 +111,7 @@ MCP（Playwright / MySQL）等配置写在容器的 `/root/.config/opencode/open
 对方 `cp .env.example .env` 填好后 `docker compose up -d` 即可（镜像已在 registry，无需本地构建），
 再首次 `/connect` 配置模型、按文档创建一次 `opencode.json`。
 
-Web 入口：apache 监听容器内 **80**，compose 映射到宿主 **8080**（`http://127.0.0.1:8080`）。
+Web 入口：nginx 监听容器内 **80**，compose 映射到宿主 **8080**（`http://127.0.0.1:8080`）。
 
 ## 配置项（.env）
 
@@ -186,7 +186,7 @@ multica login --token <TOKEN>        # 手动登录
 
 | 镜像 | 目录 | tag |
 | --- | --- | --- |
-| 基础镜像（debian13 + apache + php8.4 + pdflib） | `docker/base` | `ghcr.io/i94m/view:php8.4` |
+| 基础镜像（debian13 + nginx + php8.4 + pdflib） | `docker/base` | `ghcr.io/i94m/view:php8.4` |
 | 运行镜像（base + Node24 + multica/opencode/…） | `docker/runtime` | `ghcr.io/i94m/view:php8.4-multica` |
 
 ### 日常：CI 自动构建
@@ -258,7 +258,7 @@ docker login ghcr.io          # 用 GitHub PAT（勾 read:packages）
   仓库保持零改动。日常改代码即时生效；只有「仓库根目录新增文件」或「在 `vivid/`、
   `vivid/config/`、`vivid/config/12.x/`、`vivid/public/`、`vivid/bootstrap/` 下新增直接子项」，
   以及 `git pull` 改到那两个 Laravel 锚点/`database.php` 时，需要重启容器或执行 `/run/init.sh`。
-- **自动登录**：站点登录页被镜像替换为自动登录版（`/login.php` 走 Apache Alias），
+- **自动登录**：站点登录页被镜像替换为自动登录版（`/login.php` 走 nginx location = /login.php），
   账号取环境变量 `VIEW_USERNAME`（邮箱）。
 - **默认用户**：基础镜像默认以 `tk` 用户运行（`HOME=/opt/tk`，正好满足老代码里用
   `$_ENV['HOME']` 定位代码目录的习惯；需要 root 的启动动作由 entrypoint 用

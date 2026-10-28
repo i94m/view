@@ -180,7 +180,7 @@ docker compose up -d
 docker logs -f multica-runtime
 ```
 
-apache 监听容器内 80，映射到宿主 8080：`http://127.0.0.1:8080`。
+nginx 监听容器内 80，映射到宿主 8080：`http://127.0.0.1:8080`。
 
 ### 配置 opencode
 

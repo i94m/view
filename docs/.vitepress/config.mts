@@ -60,6 +60,7 @@ export default defineConfig({
           text: 'OpenCode',
           items: [
             { text: '安装和配置', link: '/guide/opencode' },
+            { text: '添加模型', link: '/guide/opencode-model' },
             { text: '浏览器 MCP', link: '/guide/mcp-playwright' },
             { text: '数据库 MCP', link: '/guide/mcp-database' },
           ],

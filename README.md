@@ -180,6 +180,38 @@ multica daemon status
 multica login --token <TOKEN>        # 手动登录
 ```
 
+## 开发站点预览（自测）
+
+> 仅在容器内生效：依赖容器内的 nginx/php-fpm（multica runtime 镜像），宿主机/容器外不适用。
+> 脚本随 OpenCode skill `dev-site-preview` 分发，不在镜像里内置。
+
+OpenCode skill `dev-site-preview`（`opencode-config/skills/dev-site-preview/`）自带脚本
+`scripts/view-wt.sh`，用 git worktree 把任意分支/提交检出到独立目录，生成独立预览站点并挂到
+独立**子域名**，自测分支代码而不动 `/opt/tk` 主检出与主站点。镜像侧只提供 nginx 的
+`include conf.d/*.conf` + `default_server`、以及 `site-init.sh` 的 `SITE/REPO` 覆盖。
+
+```bash
+install -m 0755 <skill>/scripts/view-wt.sh /usr/local/bin/view-wt   # 首次安装
+view-wt up                                              # 基于当前目录/当前 worktree 快速建站
+view-wt up feature/foo                                  # 前缀取分支名 → feature-foo.localhost
+view-wt up feature/foo --domain tke.example.com         # 任意域名
+view-wt up a1b2c3d --name hotfix                        # 提交/非分支用 --name 指定唯一前缀
+view-wt list                                            # 列出站点与访问子域名
+view-wt down feature-foo                                # 拆站（站点根 / nginx 块 / hosts / worktree）
+view-wt prune                                           # 容器重建后清理失效 worktree 元数据
+```
+
+- `up`（不带参）基于**当前目录/当前 worktree**建站，前缀取当前分支名；带参则新建 worktree。
+- 站点根 `/opt/preview-<name>`，nginx 块 `/etc/nginx/conf.d/<name>.conf`（`server_name
+  <name>.<domain>`、`listen 80`，主站点为 `default_server` 兜底），并写 `/etc/hosts` 的
+  `127.0.0.1 <name>.<domain>`。
+- **访问**：容器内自测 `http://<name>.<domain>/`；外部子域名 `http://<name>.<domain>:8080/`
+  （需 `*.<domain>` 解析到宿主 IP，且宿主端口映射到容器 80）。
+- **前缀**默认取分支名（提交/非分支退化为短 SHA），可用 `--name` 指定唯一前缀；
+  **域名**用 `--domain` 任意指定，默认 `localhost`（`VIEW_WT_DOMAIN` 覆盖）。
+- 站点根 / conf / hosts / state 在容器临时层，容器重建即丢（`.git/worktrees` 元数据残留用
+  `view-wt prune` 清）；需要跨重建保留时把 worktree 目录落到已挂载卷。
+
 ## 镜像构建
 
 镜像分两层，各自有独立的构建上下文：

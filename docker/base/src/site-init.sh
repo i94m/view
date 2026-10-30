@@ -29,8 +29,10 @@
 set -uo pipefail
 umask 022
 
-SITE=/opt/preview
-REPO=/opt/tk
+# SITE/REPO 可被环境变量覆盖：view-wt 用它为一个 worktree 生成独立站点根
+# （SITE=/opt/preview-<name> REPO=/opt/worktrees/<name>）。缺省即主站点。
+SITE=${SITE:-/opt/preview}
+REPO=${REPO:-/opt/tk}
 TPL=/opt/preview-tpl
 CONFIG_SRC=/opt/site-config.php
 

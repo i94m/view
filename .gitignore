@@ -11,7 +11,8 @@ docker-compose.yml
 multica/
 workspace/
 opencode/
-opencode-config/
+opencode-config/*
+!opencode-config/skills/
 opencode-data/
 sites/
 view_sql/

@@ -100,10 +100,12 @@ RUN PHP_EXTENSION_DIR=$(php -r "echo PHP_EXTENSION_DIR;") && \
 COPY src/pdflib.ini /etc/php/8.4/cli/conf.d/pdflib.ini
 COPY src/pdflib.ini /etc/php/8.4/fpm/conf.d/pdflib.ini
 
-# 配置 nginx：单文件整体替换 Debian 默认 nginx.conf（不 include sites-enabled/conf.d，
-# 包自带的 default 站点天然不生效）。apache 与 8 个 .htaccess 的每条规则都在里面
-# 逐条等价搬迁，对照表见 src/nginx/README.md。
+# 配置 nginx：单文件整体替换 Debian 默认 nginx.conf（不 include sites-enabled）。
+# apache 与 8 个 .htaccess 的每条规则都在里面逐条等价搬迁，对照表见 src/nginx/README.md。
+# http{} 内额外 include /etc/nginx/conf.d/*.conf —— view-wt 为每个 worktree 写一个
+# server 块到这里（00-placeholder.conf 保证空目录时通配仍命中一个文件）。
 COPY src/nginx/nginx.conf /etc/nginx/nginx.conf
+COPY src/nginx/conf.d /etc/nginx/conf.d
 # 构建期验证语法；nginx -t 会顺手创建空 pid 文件，删掉别烘进镜像
 RUN nginx -t && rm -f /run/nginx.pid
 

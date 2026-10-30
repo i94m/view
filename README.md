@@ -205,8 +205,8 @@ view-wt prune                                           # 容器重建后清理�
 - 站点根 `/opt/preview-<name>`，nginx 块 `/etc/nginx/conf.d/<name>.conf`（`server_name
   <name>.<domain>`、`listen 80`，主站点为 `default_server` 兜底），并写 `/etc/hosts` 的
   `127.0.0.1 <name>.<domain>`。
-- **访问**：容器内自测 `http://<name>.<domain>/`；外部子域名 `http://<name>.<domain>:8080/`
-  （需 `*.<domain>` 解析到宿主 IP，且宿主端口映射到容器 80）。
+- **访问**：容器内自测 `http://<name>.<domain>/`；外部子域名同样 `http://<name>.<domain>/`
+  （不占端口，靠子域名区分；需 `*.<domain>` 解析到宿主 IP，且宿主 80 端口转发到容器 80）。
 - **前缀**默认取分支名（提交/非分支退化为短 SHA），可用 `--name` 指定唯一前缀；
   **域名**用 `--domain` 任意指定，默认 `localhost`（`VIEW_WT_DOMAIN` 覆盖）。
 - 站点根 / conf / hosts / state 在容器临时层，容器重建即丢（`.git/worktrees` 元数据残留用

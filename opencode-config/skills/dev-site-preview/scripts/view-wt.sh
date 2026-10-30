@@ -35,8 +35,6 @@ SITE_INIT=${SITE_INIT:-/run/site-init.sh}
 DOMAIN=${VIEW_WT_DOMAIN:-localhost}
 HOSTS_FILE=${HOSTS_FILE:-/etc/hosts}
 STATE_DIR=${STATE_DIR:-/var/lib/view-worktrees}
-# 宿主映射到容器 80 的端口（compose 默认 8080），用于构造外部访问地址。
-HOST_PORT=${VIEW_WT_HOST_PORT:-8080}
 
 log() { printf '[view-wt] %s\n' "$*"; }
 die() { printf '[view-wt] 错误：%s\n' "$*" >&2; exit 1; }
@@ -108,16 +106,6 @@ host_of() {
 
 host_line() { printf '127.0.0.1 %s # view-wt' "$1"; }
 
-# 外部访问地址（经宿主端口转发；80 时省略端口）。
-ext_url() {
-  local host=$1
-  if [ "$HOST_PORT" = "80" ]; then
-    printf 'http://%s/' "$host"
-  else
-    printf 'http://%s:%s/' "$host" "$HOST_PORT"
-  fi
-}
-
 add_host() {
   local host=$1
   if ! grep -qxF "$(host_line "$host")" "$HOSTS_FILE"; then
@@ -181,8 +169,8 @@ setup_site() {
   fi
 
   log "完成：容器内 http://${host}/"
-  log "      外部   $(ext_url "$host")"
-  log "  （外部需把 *.${domain} 解析到宿主 IP，且宿主端口 ${HOST_PORT} 映射到容器 80）"
+  log "      外部   http://${host}/"
+  log "  （外部需把 *.${domain} 解析到宿主 IP，且宿主 80 端口转发到容器 80）"
   log "自测结束用：view-wt down $name"
 }
 
@@ -292,7 +280,7 @@ view-wt —— 容器内用 git worktree 搭独立预览站点（自测用，不
       生成 /opt/preview-<N>，写 /etc/nginx/conf.d/<N>.conf（server_name <N>.<D>），
       加 /etc/hosts 解析，reload nginx。
       前缀 <N> 默认取分支名（提交/非分支退化为短 SHA），域名 <D> 默认 localhost。
-      访问地址：容器内 http://<N>.<D>/ ，外部 http://<N>.<D>:<宿主端口>/
+      访问地址：http://<N>.<D>/（容器内直接可达；外部需 DNS 泛解析 + 宿主 80 转发到容器 80）
   view-wt down <name>    移除站点根 / nginx 块 / hosts 解析 /（若有）worktree，reload。
   view-wt list           列出站点（name / host / repo）。
   view-wt prune          清理失效 worktree 元数据（容器重建后）。

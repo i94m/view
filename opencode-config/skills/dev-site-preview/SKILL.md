@@ -46,9 +46,9 @@ view-wt prune                 # 清失效元数据
 
 - **容器内自测**：`http://<name>.<domain>/` —— 已写 `/etc/hosts`，容器内 `curl` 或
   Playwright MCP 直接打开。
-- **外部子域名**：`http://<name>.<domain>:<宿主端口>/`（宿主端口默认 8080，即 compose 的
-  `8080:80`；`VIEW_WT_HOST_PORT` 可覆盖）。前提：外部把 `*.<domain>` 解析到宿主 IP
-  （真实 DNS 泛解析，或在访问方机器加 hosts），且宿主端口已映射到容器 80。
+- **外部子域名**：`http://<name>.<domain>/` —— 不占端口，靠子域名区分站点。前提：外部把
+  `*.<domain>` 解析到宿主 IP（真实 DNS 泛解析，或在访问方机器加 hosts），且宿主 **80 端口**
+  转发到容器 80（如 compose 用 `80:80`，或经反向代理）。
 
 ## 关键事实（别踩）
 

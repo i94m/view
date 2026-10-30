@@ -129,8 +129,11 @@ remove_host() {
   local host=$1 line
   line=$(host_line "$host")
   if grep -qxF "$line" "$HOSTS_FILE"; then
+    # 注意：/etc/hosts 是 bind mount 文件，不能用 mv/rename 覆盖（会报 Device or resource busy），
+    # 必须原地重写（cat > 覆盖同一 inode）。
     grep -vxF "$line" "$HOSTS_FILE" > "$HOSTS_FILE.tmp" || true
-    mv "$HOSTS_FILE.tmp" "$HOSTS_FILE"
+    cat "$HOSTS_FILE.tmp" > "$HOSTS_FILE"
+    rm -f "$HOSTS_FILE.tmp"
   fi
 }
 

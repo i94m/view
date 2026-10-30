@@ -182,8 +182,9 @@ multica login --token <TOKEN>        # 手动登录
 
 ## 开发站点预览（自测）
 
-> 仅在容器内生效：依赖容器内的 nginx/php-fpm（multica runtime 镜像），宿主机/容器外不适用。
-> 脚本随 OpenCode skill `dev-site-preview` 分发，不在镜像里内置。
+> 脚本随 OpenCode skill `dev-site-preview` 分发，不在镜像里内置。两种用法：**容器内**用
+> `view-wt`（nginx 子域名多站点）；**宿主机装了 docker/podman** 时用 `host-preview`
+> （拉 `ghcr.io/i94m/view:php8.4` 起预览环境）。
 
 OpenCode skill `dev-site-preview`（`opencode-config/skills/dev-site-preview/`）自带脚本
 `scripts/view-wt.sh`，用 git worktree 把任意分支/提交检出到独立目录，生成独立预览站点并挂到
@@ -211,6 +212,16 @@ view-wt prune                                           # 容器重建后清理�
   **域名**用 `--domain` 任意指定，默认 `localhost`（`VIEW_WT_DOMAIN` 覆盖）。
 - 站点根 / conf / hosts / state 在容器临时层，容器重建即丢（`.git/worktrees` 元数据残留用
   `view-wt prune` 清）；需要跨重建保留时把 worktree 目录落到已挂载卷。
+
+**宿主机 + docker/podman 的轻量预览**（runtime 不在容器时）：用 skill 自带的
+`scripts/host-preview.sh`，拉基础镜像 `ghcr.io/i94m/view:php8.4` 起单容器预览环境。
+
+```bash
+install -m 0755 <skill>/scripts/host-preview.sh /usr/local/bin/host-preview
+host-preview up                                   # 预览当前目录（默认 8080）
+host-preview up feature/foo --port 8081 --config /path/to/config.php
+host-preview list && host-preview down <name>
+```
 
 ## 镜像构建
 

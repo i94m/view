@@ -26,6 +26,9 @@
 # 主站点与主检出 /opt/tk 全程不动。站点/conf/hosts/state 在容器临时层，容器重建后丢失；
 # /opt/tk/.git/worktrees 元数据在 bind mount 上，重建后用 view-wt prune 清。
 set -euo pipefail
+# macOS/bash 会把全角字符（如 （）「」）的字节当字母，导致 `$var（` 被误解析成变量名
+# `$var<乱码>` 而报 unbound variable；固定 C locale 让 isalnum 只认 ASCII，跨平台更稳。
+export LC_ALL=C
 
 MAIN_REPO=${MAIN_REPO:-/opt/tk}
 WORKTREE_ROOT=${WORKTREE_ROOT:-/opt/worktrees}

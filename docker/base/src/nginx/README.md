@@ -23,7 +23,7 @@ entrypoint（`sudo -E`）继承，与前端是谁无关。
 | `SetEnvIf Authorization .+ HTTP_AUTHORIZATION=$0` | `fastcgi_param HTTP_AUTHORIZATION $http_authorization` |
 | `AddOutputFilterByType DEFLATE …` | `gzip on` + `gzip_types` + `gzip_min_length 256` |
 | Apache 默认拒绝 `.ht*` | `location ~ /\.ht { deny all; }`，**每个 `^~` 模块内重复一条** |
-| 无 `LimitRequestBody`，真实上限是 php.ini 的 150M | `client_max_body_size 150m` |
+| 无 `LimitRequestBody`，真实上限是 php.ini 的 512M | `client_max_body_size 512m` |
 | `ServerTokens` | `server_tokens off` |
 
 ## Apache 专属 `$_SERVER` 变量（不改仓库代码的关键）
@@ -55,7 +55,9 @@ entrypoint（`sudo -E`）继承，与前端是谁无关。
 | 项 | 值 | 说明 |
 |---|---|---|
 | `upstream phpfpm` + `fastcgi_keep_conn` | `keepalive 32` | 复用与 FPM 的连接，省掉每请求的 loopback 握手 |
-| `fastcgi_buffer_size` / `fastcgi_buffers` | `32k` / `16 32k` | 页面常见 100–500KB（`/common/myaccount.php` 501KB），默认 8×4k 会落盘再读回 |
+| `fastcgi_buffer_size` / `fastcgi_buffers` | `32k` / `32 64k`（2MB） | 页面常见 100–500KB（`/common/myaccount.php` 501KB），导出页更大；默认 8×4k 会落盘再读回 |
+| 超时 | `fastcgi_read_timeout / fastcgi_send_timeout 900s`、`client_*_timeout 300s`、`send_timeout 300s` | 与 FPM `request_terminate_timeout=900s` 对齐，本地导出/大上传不被误杀 |
+| `client_max_body_size` | `512m` | 与 php.ini 的 `post_max_size` / `upload_max_filesize` 三处必须一致 |
 | `gzip_comp_level` | `5` | 6→5 CPU 更省，压缩率差别 <1% |
 | `worker_processes` | `4` | 开发容器固定 4 个；`auto` 在 12 核宿主机上会起 12 个 worker（~65MB 常驻），压测时再调大 |
 

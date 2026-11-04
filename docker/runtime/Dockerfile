@@ -142,9 +142,6 @@ RUN chmod +x /run/entrypoint-multica.sh && \
     mkdir -p /opt/tk /opt/ai_asset /opt/air_platform /opt/db_change_scripts /opt/auto_testing \
              /workspace /root/.config/opencode
 
-# Playwright login helper (reads VIEW_USERNAME / VIEW_PASSWORD).
-COPY login.ts /opt/playwright/login.ts
-
 # 默认工作目录 = /workspace（进容器的落脚目录）。项目统一挂在 /opt 下：
 #   /opt/tk、/opt/ai_asset、/opt/air_platform、/opt/db_change_scripts、/opt/auto_testing
 # 代码仓库 /opt/tk 与基础镜像的 WORKDIR / PHP include_path / tk 家目录一致；

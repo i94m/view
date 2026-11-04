@@ -43,8 +43,7 @@ docker compose (bridge 网络，默认子网 172.16.10.0/24)
 │   │   └── src/                   #   php.ini / nginx / xdebug / site-init.sh / preview/ / pdflib .so
 │   ├── runtime/                   # 运行镜像 → ghcr.io/i94m/view:php8.4-multica
 │   │   ├── Dockerfile            #   base + Node24 + git-lfs + multica/opencode/openspec + MySQL MCP
-│   │   ├── entrypoint-multica.sh #   容器入口：配置 git 凭据 + 自启动 multica daemon
-│   │   └── login.ts              #   Playwright 登录辅助（构建时放入 /opt/playwright/）
+│   │   └── entrypoint-multica.sh #   容器入口：配置 git 凭据 + 自启动 multica daemon
 │   └── build.sh                   # 本地构建脚本（默认按本机架构 --load，不 push）
 ├── .github/workflows/package.yml  # CI：多架构构建并推送 GHCR
 ├── docker-compose.yml        # 运行编排：runtime（从 .example 复制）
@@ -121,7 +120,7 @@ Web 入口：nginx 监听容器内 **80**，compose 映射到宿主 **8080**（`
 | `GIT_VIEW_CODE` | 可选：仅当 Git 主机不是 `git.ap.tkelevator.com` 时用于推导 git host（`entrypoint-multica.sh`），缺省回退该地址 |
 | （登录） | 登录态存于 `./.multica/config.json`（挂载持久化），首次进容器 `multica login --token mul_xxx` |
 | `VIEW_USERNAME` | 自动登录邮箱（站点登录页读取；Playwright 也用这个账号） |
-| `VIEW_PASSWORD` | Playwright 登录密码（`login.ts` 读取） |
+| `VIEW_PASSWORD` | Playwright 登录密码（供技能中的登录脚本使用） |
 | `HOST_SITE_CONFIG` | 站点配置 `config.php` 的宿主路径，只读挂载到 `/opt/site-config.php` |
 | `MULTICA_SERVER_URL` | multica server 地址 |
 | `MULTICA_DAEMON_DEVICE_NAME` | multica daemon 设备名；建议填 `"Your-Name's Runtime on Container"`；小队整队共用一个 runtime、一个设备名 |

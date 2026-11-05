@@ -19,6 +19,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 # sys/libs/System.php（被 OLE/PPS 用）会 require 'Console/Getopt.php'，那个来自 PEAR。
 # memcached 不用 apt 装，改成 dpkg-deb 抽二进制（apt 装会拖进 perl ~50 MiB），
 # 所以这里显式装它的两个运行库；对应的 memcache 用户和启动方式见 entrypoint。
+# PHP 8.4 对应 PHPUnit 13；独立 PHAR 不会改动项目的 Composer 依赖。
 RUN useradd -m -d /opt/tk -s /bin/bash -c "TK User" tk && \
     apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -77,6 +78,9 @@ RUN useradd -m -d /opt/tk -s /bin/bash -c "TK User" tk && \
         chmod +x /usr/local/bin/composer; \
     fi && \
     composer --version && \
+    wget -O /usr/local/bin/phpunit https://phar.phpunit.de/phpunit-13.phar && \
+    chmod +x /usr/local/bin/phpunit && \
+    phpunit --version | grep -q '^PHPUnit 13\.' && \
     rm -rf /usr/share/doc/* /usr/share/man/* && \
     echo 'tk ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/tk && \
     chmod 0440 /etc/sudoers.d/tk && \

@@ -180,6 +180,8 @@ jobs:
           docker run --rm --platform linux/amd64 "$IMG" bash -c '
             set -e
             php -v | head -1
+            command -v phpunit
+            phpunit --version | grep -q "^PHPUnit 13\."
             php -m | grep -qx "PDFlib" && echo "pdflib: ok"
             php -m | grep -qx "Zend OPcache" || true
             # 镜像默认 USER tk：nginx -t 要写 /run/nginx.pid，必须走 sudo

@@ -124,17 +124,6 @@ RUN --mount=type=cache,target=/root/.npm \
     chmod 0755 "${CLI_DIR}/bin/opencode.exe"; \
     grep -q ELF "${CLI_DIR}/bin/opencode.exe"
 
-# OpenCode V2 自动加载系统目录 /etc/opencode/plugins/ 下的插件；不用用户的
-# /root/.config/opencode（Compose 会把它挂载覆盖）。插件与服务端固定同一版本，
-# 下载后校验发布源码的 SHA-256，避免构建时拉到其他内容。
-ARG AGENTMEMORY_MCP_VERSION
-RUN set -eux; \
-    mkdir -p /etc/opencode/plugins/agentmemory-capture; \
-    curl --connect-timeout 15 --retry 3 --retry-delay 5 --retry-all-errors -fSL \
-      "https://raw.githubusercontent.com/rohitg00/agentmemory/v${AGENTMEMORY_MCP_VERSION}/plugin/opencode/agentmemory-capture.ts" \
-      -o /etc/opencode/plugins/agentmemory-capture/index.ts; \
-    echo '64c4fdb4129ef53dd7c2cfca6a413ab8f4c47fe59159ebeb108422adcd4af944  /etc/opencode/plugins/agentmemory-capture/index.ts' | sha256sum -c -
-
 # 3c) uv (Python package/project manager) — binaries only (~47MB).
 COPY --from=ghcr.io/astral-sh/uv:debian-slim /usr/local/bin/uv /usr/local/bin/uvx /usr/local/bin/
 

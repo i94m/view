@@ -1,6 +1,6 @@
 # 持久记忆
 
-有了持久记忆，编码 Agent 在新会话中也能找回之前保存的项目约定、技术决策和排查结论，不必每次从头解释。[AgentMemory](https://www.agent-memory.dev/docs) 是独立的记忆服务，支持 OpenCode、Claude Code、Codex、Cursor 等多种 Agent。下面用 Docker Compose 部署服务，并以 **OpenCode** 为接入示例，无需下载本项目仓库。
+有了持久记忆，编码 Agent 可以在新会话中**主动检索**之前保存的项目约定、技术决策和排查结论，不必每次从头解释。本示例仅启用 MCP 显式存取，**不安装自动捕获插件，也不会自动注入过往会话**。[AgentMemory](https://www.agent-memory.dev/docs) 是独立的记忆服务，支持 OpenCode、Claude Code、Codex、Cursor 等多种 Agent。下面用 Docker Compose 部署服务，并以 **OpenCode** 为接入示例，无需下载本项目仓库。
 
 ## 1. 创建目录和密钥
 
@@ -56,12 +56,11 @@ services:
 ```bash
 docker compose up -d
 docker exec multica-runtime opencode mcp add agentmemory --global -- agentmemory-mcp
-docker exec multica-runtime opencode mcp list
 docker exec -it multica-runtime opencode
 ```
 
-首次使用 OpenCode 时，在界面输入 `/connect` 配置模型。然后打开 `/mcps`，确认 `agentmemory` 已连接；用 `memory_save` 保存一条带项目名称的决策，新开会话后用 `memory_recall` 查询该项目。如果首次连接时服务还没准备好，稍等后在 `/mcps` 重试。
+首次使用 OpenCode 时，在界面输入 `/connect` 配置模型。然后打开 `/mcps`，确认 `agentmemory` 已连接；明确要求 Agent 使用 `memory_save` 保存一条带项目名称的决策，记录成功工具调用返回的记忆 ID。新开会话后，明确要求使用 `memory_recall` 查询**同一项目**，核对返回的是同一个 ID。只看到 Agent 复述内容，不代表已经存入记忆。如果首次连接时服务还没准备好，稍等后在 `/mcps` 重试。
 
-示例镜像还内置 OpenCode 自动捕获插件，可在 `http://127.0.0.1:3113` 查看会话记录；关键结论仍建议主动保存。自动捕获会把提示词和工具结果写入共享记忆服务，请注意隐私。已有 OpenCode 容器的用户不必再创建一个 runtime：让原容器接入同一 Docker 网络、设置上述三个 `AGENTMEMORY_*` 环境变量，并在其中配置 MCP 即可。
+示例镜像只内置 MCP 客户端，不会自动记录 OpenCode 会话；查看器可以查看显式保存的记忆，但 Sessions 中没有自动捕获的记录是正常的。已有 OpenCode 容器的用户不必再创建一个 runtime：让原容器接入同一 Docker 网络、设置上述三个 `AGENTMEMORY_*` 环境变量，并在其中配置 MCP 即可。
 
 使用其他 Agent 时，保留 `agentmemory` 服务并按[官方接入指南](https://agent-memory.dev/docs/connectors)配置对应客户端；不同 Agent 支持插件、钩子或仅 MCP，自动捕获能力并不相同。

@@ -38,9 +38,8 @@ AgentMemory 由仓库根目录的 `docker-compose.agentmemory.yml` 单独管理�
 不要使用 `docker compose down -v` 清除它。
 首次配置请在 `.env` 设置强随机 `AGENTMEMORY_SECRET`；更新到预装 MCP 客户端的
 runtime 镜像后，执行 `docker exec multica-runtime opencode mcp add agentmemory --global -- agentmemory-mcp`。
-新版 runtime 镜像已内置 OpenCode 的自动捕获插件（独立于 MCP 工具）；
-升级前先排查是否手动装过同名插件。自动捕获的隐私说明和验证方式见
-`../docs/guide/opencode.md`。
+runtime 镜像仅内置 MCP 客户端，不启用自动捕获；记忆需要通过 MCP 工具显式保存和召回。
+具体操作与验证见 `../docs/guide/persistent-memory.md`。
 
 ## 配置运行时
 

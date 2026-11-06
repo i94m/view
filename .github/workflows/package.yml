@@ -197,7 +197,7 @@ jobs:
             test -x /usr/bin/tini
             command -v git-lfs
             command -v agentmemory-mcp
-            test -s /etc/opencode/plugins/agentmemory-capture/index.ts
+            test ! -e /etc/opencode/plugins/agentmemory-capture/index.ts
             openspec --version || echo "openspec version: skipped"
             test -x /run/entrypoint.sh
             test -x /run/entrypoint-multica.sh

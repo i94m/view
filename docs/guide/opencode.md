@@ -86,7 +86,7 @@ OpenCode 的运行数据目录也会单独持久化：
   - [浏览器 MCP](/guide/mcp-playwright) —— 浏览器自动化
   - [数据库 MCP](/guide/mcp-database) —— 查询 MySQL（默认只读）
 
-跨会话保存与检索项目经验，参见「探索」中的[持久记忆](/guide/persistent-memory)（以 OpenCode 为接入示例）。
+需要通过 MCP 工具显式保存、检索跨会话的项目经验，参见「探索」中的[持久记忆](/guide/persistent-memory)（以 OpenCode 为接入示例，不启用自动捕获）。
 
 建议在配置文件中保留 schema，方便编辑器校验与补全：
 

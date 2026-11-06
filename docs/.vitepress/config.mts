@@ -68,6 +68,7 @@ export default defineConfig({
         {
           text: '探索',
           items: [
+            { text: '持久记忆', link: '/guide/persistent-memory' },
             { text: 'Agent 小队 <span class="sidebar-badge">测试</span>', link: '/guide/squads' },
           ],
         },

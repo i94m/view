@@ -162,7 +162,8 @@ jobs:
   # amd64 冒烟：确认 php/pdflib/nginx/node/multica 都在位。
   smoke:
     needs: runtime
-    if: needs.runtime.result == 'success'
+    # runtime 在 base 跳过时仍会运行；smoke 也必须显式处理这个上游 skip。
+    if: always() && needs.runtime.result == 'success'
     runs-on: ubuntu-latest
     steps:
       - name: Login to GHCR

@@ -1,0 +1,20 @@
+# 独立启动：docker compose -f docker-compose.agentmemory.yml up -d
+# 先启动本文件，再启动 runtime 的 docker-compose.yml；两者通过固定名称的 Docker 网络通信。
+name: view-agentmemory
+
+services:
+  agentmemory:
+    image: ghumarerohit/agentmemory:0.9.32
+    environment:
+      AGENTMEMORY_SECRET: ${AGENTMEMORY_SECRET:?请先在 .env 中设置 AGENTMEMORY_SECRET}
+    volumes:
+      - ./agentmemory-data:/data
+    ports:
+      - "127.0.0.1:3113:3113" # 查看器仅限本机；3111 仅供 Docker 网络内客户端访问
+    networks:
+      - agentmemory
+    restart: unless-stopped
+
+networks:
+  agentmemory:
+    name: view-agentmemory

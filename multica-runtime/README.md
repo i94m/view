@@ -8,7 +8,10 @@
 
 ```bash
 docker login ghcr.io                  # 私有包需要；已设为 public 可跳过
-cp .env.example .env                  # 填 git 凭据 + HOST_*_PATH 挂载路径 + HOST_SITE_CONFIG（站点 config.php）
+cp docker-compose.yml.example docker-compose.yml
+cp .env.example .env                  # 填 git 凭据、挂载路径、站点配置及 AGENTMEMORY_SECRET
+# 先在仓库根目录 .env 中填入同一个 AGENTMEMORY_SECRET
+cd .. && docker compose -f docker-compose.agentmemory.yml up -d && cd multica-runtime
 docker compose up -d
 docker logs -f multica-runtime
 ```
@@ -25,8 +28,19 @@ docker exec -it multica-runtime opencode
 
 在界面里输入 `/connect`，按提示选择模型服务商、填入 API Key，保存后即可使用。
 
-MCP（Playwright / MySQL）等配置写在容器的 `/root/.config/opencode/opencode.json`，
-完整示例（本机版 / 容器版）见文档站点 `docs/guide/opencode.md`。
+MCP（Playwright / MySQL / AgentMemory）等配置写在容器的 `/root/.config/opencode/opencode.json`，
+完整示例（本机版 / 容器版）见 `../docs/guide/opencode.md`。
+
+AgentMemory 由仓库根目录的 `docker-compose.agentmemory.yml` 单独管理，
+记忆保存在根目录 `agentmemory-data/`；两份 Compose 通过 `view-agentmemory` 网络通信。
+如果原来在本目录的 Compose 中启动过 `agentmemory`，需先备份其具名卷并
+停止旧容器；否则旧服务占用宿主机 3113 端口，新服务无法启动。旧卷不会自动迁移，
+不要使用 `docker compose down -v` 清除它。
+首次配置请在 `.env` 设置强随机 `AGENTMEMORY_SECRET`；更新到预装 MCP 客户端的
+runtime 镜像后，执行 `docker exec multica-runtime opencode mcp add agentmemory --global -- agentmemory-mcp`。
+新版 runtime 镜像已内置 OpenCode 的自动捕获插件（独立于 MCP 工具）；
+升级前先排查是否手动装过同名插件。自动捕获的隐私说明和验证方式见
+`../docs/guide/opencode.md`。
 
 ## 配置运行时
 

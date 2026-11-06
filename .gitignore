@@ -13,7 +13,9 @@ workspace/
 opencode/
 opencode-config/*
 !opencode-config/skills/
+multica-runtime/opencode-config/
 opencode-data/
+agentmemory-data/
 sites/
 view_sql/
 

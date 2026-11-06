@@ -1,6 +1,8 @@
 # 基础镜像由本仓库的 docker/base/ 构建（见 .github/workflows/package.yml），
 # 默认取 CI 推送的 tag；本地可用 --build-arg BASE_IMAGE=... 覆盖。
 ARG BASE_IMAGE=ghcr.io/i94m/view:php8.4
+ARG AGENTMEMORY_MCP_VERSION=0.9.32
+FROM ghumarerohit/agentmemory:${AGENTMEMORY_MCP_VERSION} AS agentmemory
 FROM ${BASE_IMAGE}
 
 # 基础镜像默认 USER tk（本地开发用），这里换回 root：daemon、安装、git 凭据都需要 root
@@ -93,6 +95,14 @@ RUN --mount=type=cache,target=/root/.npm \
     find /usr/local/lib/node_modules -type f \
         \( -name '*.map' -o -name '*.md' -o -name '*.d.ts' \) -delete
 
+# 只复制与 Compose 服务端同版本的官方 MCP stdio 入口。npm 安装 @agentmemory/mcp
+# 会连带装入服务端的 LLM/ONNX 依赖（约 800 MiB）；该入口代理远程 REST 时
+# 仅需要打包的 standalone.mjs 和 picocolors，不在客户端运行服务端。
+COPY --from=agentmemory /opt/agentmemory/dist/standalone.mjs /usr/local/lib/agentmemory/standalone.mjs
+COPY --from=agentmemory /opt/agentmemory/node_modules/picocolors/ /usr/local/lib/agentmemory/node_modules/picocolors/
+COPY agentmemory-mcp.sh /usr/local/bin/agentmemory-mcp
+RUN chmod 0755 /usr/local/bin/agentmemory-mcp && node --check /usr/local/lib/agentmemory/standalone.mjs
+
 # 3b) opencode V2 (npm package @opencode/cli, version via OPENCODE_VERSION).
 #     Its postinstall execs the freshly linked binary to self-verify; during a
 #     multi-arch build the foreign-arch binary can't run under QEMU, so the script
@@ -113,6 +123,17 @@ RUN --mount=type=cache,target=/root/.npm \
         cp "${SRC}" "${CLI_DIR}/bin/opencode.exe"; \
     chmod 0755 "${CLI_DIR}/bin/opencode.exe"; \
     grep -q ELF "${CLI_DIR}/bin/opencode.exe"
+
+# OpenCode V2 自动加载系统目录 /etc/opencode/plugins/ 下的插件；不用用户的
+# /root/.config/opencode（Compose 会把它挂载覆盖）。插件与服务端固定同一版本，
+# 下载后校验发布源码的 SHA-256，避免构建时拉到其他内容。
+ARG AGENTMEMORY_MCP_VERSION
+RUN set -eux; \
+    mkdir -p /etc/opencode/plugins/agentmemory-capture; \
+    curl --connect-timeout 15 --retry 3 --retry-delay 5 --retry-all-errors -fSL \
+      "https://raw.githubusercontent.com/rohitg00/agentmemory/v${AGENTMEMORY_MCP_VERSION}/plugin/opencode/agentmemory-capture.ts" \
+      -o /etc/opencode/plugins/agentmemory-capture/index.ts; \
+    echo '64c4fdb4129ef53dd7c2cfca6a413ab8f4c47fe59159ebeb108422adcd4af944  /etc/opencode/plugins/agentmemory-capture/index.ts' | sha256sum -c -
 
 # 3c) uv (Python package/project manager) — binaries only (~47MB).
 COPY --from=ghcr.io/astral-sh/uv:debian-slim /usr/local/bin/uv /usr/local/bin/uvx /usr/local/bin/

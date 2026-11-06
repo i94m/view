@@ -2,12 +2,14 @@
 
 各 runtime（本机或容器）上代码仓库的路径往往不一致。为了让 opencode / multica 在任意环境下都能**统一**地定位代码、读取凭据，这里把这些信息集中放进环境变量。按系统设置：
 
-## macOS / WSL
+## 按系统设置
 
-写进 `~/.zshrc` 或 `~/.bashrc`，改完 `source ~/.zshrc`（或重开终端）生效：
+macOS 和 Linux 将对应内容写入 `~/.zshrc` 或 `~/.bashrc`，然后 `source` 该文件（或重开终端）；Windows 在 PowerShell 中执行 `setx`，重开终端后生效。宿主机运行时，请把项目路径改为实际位置。
 
-```bash
-# 路径（容器内固定为 /opt/*；在宿主机上运行 multica 时改成本机实际路径）
+::: code-group
+
+```bash [macOS / Linux / WSL]
+# 路径（项目代码位置）
 export VIEW_CODE_PATH="/opt/tk"
 export AI_ASSET_PATH="/opt/ai_asset"
 export VIEW_USER_MANUAL="/opt/view_user_menual"
@@ -26,28 +28,10 @@ export VIEW_PASSWORD="your-test-password"
 
 # multica
 export MULTICA_SERVER_URL="http://multica.gyouths.cn:3456"
-export MULTICA_DAEMON_DEVICE_NAME="Your-Name's Runtime on Windows Host"
+export MULTICA_DAEMON_DEVICE_NAME="Your-Name's Runtime on Host"
 ```
 
-::: tip
-如果是在 WSL 中运行，可以把设备名改成 `"Your-Name's Runtime on WSL Host"`。
-:::
-
-::: tip 验证
-以 `GIT_USERNAME` 为例：
-
-```bash
-echo "$GIT_USERNAME"
-```
-
-能打印出用户名即配置成功；输出为空说明没生效，检查变量名拼写，并 `source ~/.zshrc`（或 `~/.bashrc`）或重开终端。
-:::
-
-## Windows
-
-PowerShell（`setx` 写用户级变量，重开终端生效）：
-
-```powershell
+```powershell [Windows]
 # 路径（项目代码位置）
 setx VIEW_CODE_PATH "C:\path\to\view"
 setx AI_ASSET_PATH "C:\path\to\asset"
@@ -70,16 +54,26 @@ setx MULTICA_SERVER_URL "http://multica.gyouths.cn:3456"
 setx MULTICA_DAEMON_DEVICE_NAME "Your-Name's Runtime on Windows Host"
 ```
 
-也可以在「系统属性 → 环境变量」里手动添加。
+:::
+
+Windows 也可以在「系统属性 → 环境变量」里手动添加。
 
 ::: tip 验证
-以 `GIT_USERNAME` 为例：
+重开终端后，以 `GIT_USERNAME` 为例检查：
 
-```powershell
+::: code-group
+
+```bash [macOS / Linux / WSL]
+echo "$GIT_USERNAME"
+```
+
+```powershell [Windows]
 echo $env:GIT_USERNAME
 ```
 
-能打印出用户名即配置成功；输出为空说明没生效，检查变量名拼写，并**重开终端**（`setx` 写入的变量需重开终端才生效）。
+:::
+
+能打印出用户名即配置成功；输出为空则检查变量名拼写及是否已加载新的环境变量。
 :::
 
 ## 变量说明

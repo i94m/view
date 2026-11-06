@@ -164,7 +164,7 @@ RUN chmod +x /run/entrypoint-multica.sh && \
              /workspace /root/.config/opencode
 
 # 默认工作目录 = /workspace（进容器的落脚目录）。项目统一挂在 /opt 下：
-#   /opt/tk、/opt/ai_asset、/opt/air_platform、/opt/db_change_scripts、/opt/auto_testing
+#   /opt/tk、/opt/ai_asset、/opt/view_user_menual、/opt/air_platform、/opt/db_change_scripts、/opt/auto_testing
 # 代码仓库 /opt/tk 与基础镜像的 WORKDIR / PHP include_path / tk 家目录一致；
 # 预览站点根由基础镜像的 /run/site-init.sh 生成在 /opt/preview。
 # multica 的「任务工作目录」与 WORKDIR 无关：它固定用工作区根

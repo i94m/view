@@ -144,6 +144,7 @@ HOST_ASSET_PATH=/Users/you/tke/asset
 | --- | --- | --- |
 | `${HOST_VIEW_PATH}` | `/opt/tk` | `VIEW_CODE_PATH`（VIEW 代码仓库 / 工作目录 / tk 主目录） |
 | `${HOST_ASSET_PATH}` | `/opt/ai_asset` | `AI_ASSET_PATH`（AI Asset 仓库） |
+| `${HOST_VIEW_USER_MANUAL_PATH}` | `/opt/view_user_menual` | `VIEW_USER_MANUAL`（VIEW 用户手册项目） |
 | `${HOST_AIR_PLATFORM_PATH}` | `/opt/air_platform` | `AIR_PLATFORM_PATH`（AIR Platform 仓库） |
 | `${HOST_VIEW_SQL_PATH}` | `/opt/db_change_scripts` | `VIEW_SQL_PATH`（DB 变更脚本） |
 | `${HOST_AUTO_TESTING_PATH}` | `/opt/auto_testing` | `AUTO_TESTING_PATH`（自动化测试） |

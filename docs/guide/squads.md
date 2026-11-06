@@ -33,9 +33,10 @@ BA 同时承担测试职责；成员数量可按需增减。
 
 ```dotenv
 # 共享目录，对应容器内 /opt/tk、/opt/ai_asset、/opt/air_platform、
-# /opt/db_change_scripts、/opt/auto_testing
+# /opt/view_user_menual、/opt/db_change_scripts、/opt/auto_testing
 HOST_VIEW_PATH=/path/to/view
 HOST_ASSET_PATH=/path/to/asset
+HOST_VIEW_USER_MANUAL_PATH=/path/to/view_user_menual
 HOST_AIR_PLATFORM_PATH=/path/to/air_platform
 HOST_VIEW_SQL_PATH=/path/to/view_sql
 HOST_AUTO_TESTING_PATH=/path/to/auto_testing
@@ -53,7 +54,7 @@ VIEW_USERNAME=you@rayootech.com
 VIEW_PASSWORD=your-test-password
 
 # multica（整支小队共用一个 runtime）
-MULTICA_SERVER_URL=http://210.74.156.242:3456
+MULTICA_SERVER_URL=http://multica.gyouths.cn:3456
 MULTICA_DAEMON_DEVICE_NAME="Example team's runtime"
 ```
 
@@ -78,12 +79,14 @@ services:
     environment:
       VIEW_CODE_PATH: /opt/tk
       AI_ASSET_PATH: /opt/ai_asset
+      VIEW_USER_MANUAL: /opt/view_user_menual
       AIR_PLATFORM_PATH: /opt/air_platform
       VIEW_SQL_PATH: /opt/db_change_scripts
       AUTO_TESTING_PATH: /opt/auto_testing
     volumes:
       - ${HOST_VIEW_PATH}:/opt/tk
       - ${HOST_ASSET_PATH}:/opt/ai_asset
+      - ${HOST_VIEW_USER_MANUAL_PATH}:/opt/view_user_menual
       - ${HOST_AIR_PLATFORM_PATH}:/opt/air_platform
       - ${HOST_VIEW_SQL_PATH}:/opt/db_change_scripts
       - ${HOST_AUTO_TESTING_PATH}:/opt/auto_testing
@@ -171,8 +174,8 @@ docker compose exec multica opencode
 
 ```bash
 docker compose exec multica multica setup self-host \
-  --server-url http://210.74.156.242:3456 \
-  --app-url    http://210.74.156.242:3456
+  --server-url http://multica.gyouths.cn:3456 \
+  --app-url    http://multica.gyouths.cn:3456
 ```
 
 确认 runtime 已注册（名称取自 `MULTICA_DAEMON_DEVICE_NAME`）：

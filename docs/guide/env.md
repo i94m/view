@@ -10,6 +10,7 @@
 # 路径（容器内固定为 /opt/*；在宿主机上运行 multica 时改成本机实际路径）
 export VIEW_CODE_PATH="/opt/tk"
 export AI_ASSET_PATH="/opt/ai_asset"
+export VIEW_USER_MANUAL="/opt/view_user_menual"
 export AIR_PLATFORM_PATH="/opt/air_platform"
 export VIEW_SQL_PATH="/opt/db_change_scripts"
 export AUTO_TESTING_PATH="/opt/auto_testing"
@@ -24,7 +25,7 @@ export VIEW_USERNAME="you@rayootech.com"
 export VIEW_PASSWORD="your-test-password"
 
 # multica
-export MULTICA_SERVER_URL="http://210.74.156.242:3456"
+export MULTICA_SERVER_URL="http://multica.gyouths.cn:3456"
 export MULTICA_DAEMON_DEVICE_NAME="Your-Name's Runtime on Windows Host"
 ```
 
@@ -50,6 +51,7 @@ PowerShell（`setx` 写用户级变量，重开终端生效）：
 # 路径（项目代码位置）
 setx VIEW_CODE_PATH "C:\path\to\view"
 setx AI_ASSET_PATH "C:\path\to\asset"
+setx VIEW_USER_MANUAL "C:\path\to\view_user_menual"
 setx AIR_PLATFORM_PATH "C:\path\to\air_platform"
 setx VIEW_SQL_PATH "C:\path\to\view_sql"
 setx AUTO_TESTING_PATH "C:\path\to\auto_testing"
@@ -64,7 +66,7 @@ setx VIEW_USERNAME "you@rayootech.com"
 setx VIEW_PASSWORD "your-test-password"
 
 # multica
-setx MULTICA_SERVER_URL "http://210.74.156.242:3456"
+setx MULTICA_SERVER_URL "http://multica.gyouths.cn:3456"
 setx MULTICA_DAEMON_DEVICE_NAME "Your-Name's Runtime on Windows Host"
 ```
 
@@ -86,6 +88,7 @@ echo $env:GIT_USERNAME
 | --- | --- |
 | `VIEW_CODE_PATH` | View项目代码目录 |
 | `AI_ASSET_PATH` | AI Asset 仓库 |
+| `VIEW_USER_MANUAL` | VIEW 用户手册项目目录 |
 | `AIR_PLATFORM_PATH` | AIR Platform 仓库目录 |
 | `VIEW_SQL_PATH` | DB 变更脚本 |
 | `AUTO_TESTING_PATH` | 自动化测试目录 |

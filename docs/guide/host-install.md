@@ -36,12 +36,12 @@ Desktop 默认连接 Multica Cloud。若要连接**自托管实例**，需在用
 ```json
 {
   "schemaVersion": 1,
-  "apiUrl": "http://210.74.156.242:3456"
+  "apiUrl": "http://multica.gyouths.cn:3456"
 }
 ```
 
 - `schemaVersion`：固定填 `1`。
-- `apiUrl`：自托管实例地址，与 `.env` 里的 `MULTICA_SERVER_URL` 一致；本项目为 `http://210.74.156.242:3456`。
+- `apiUrl`：自托管实例地址，与 `.env` 里的 `MULTICA_SERVER_URL` 一致；本项目为 `http://multica.gyouths.cn:3456`。
 
 改完重启 Desktop 生效。
 
@@ -52,11 +52,11 @@ Desktop 默认连接 Multica Cloud。若要连接**自托管实例**，需在用
 ::: code-group
 
 ```bash [macOS / Linux]
-curl -fsSL http://210.74.156.242:8008/multica/install.sh | bash
+curl -fsSL http://multica.gyouths.cn:8008/multica/install.sh | bash
 ```
 
 ```powershell [Windows PowerShell]
-iwr http://210.74.156.242:8008/multica/install.ps1 | iex
+iwr http://multica.gyouths.cn:8008/multica/install.ps1 | iex
 ```
 
 :::
@@ -95,6 +95,7 @@ docker compose version
 # 宿主挂载路径（compose 里 ${HOST_*_PATH} 的取值，按本机实际路径填）
 HOST_VIEW_PATH=/path/to/view
 HOST_ASSET_PATH=/path/to/asset
+HOST_VIEW_USER_MANUAL_PATH=/path/to/view_user_menual
 HOST_AIR_PLATFORM_PATH=/path/to/air_platform
 HOST_VIEW_SQL_PATH=/path/to/view_sql
 HOST_AUTO_TESTING_PATH=/path/to/auto_testing
@@ -112,7 +113,7 @@ VIEW_USERNAME=you@rayootech.com
 VIEW_PASSWORD=your-test-password
 
 # multica
-MULTICA_SERVER_URL=http://210.74.156.242:3456
+MULTICA_SERVER_URL=http://multica.gyouths.cn:3456
 # 单 runtime 的 daemon 设备名；用于在 multica 中区分这台容器，可按用户/机器名修改
 MULTICA_DAEMON_DEVICE_NAME="Your-Name's Runtime on Container"
 ```
@@ -123,7 +124,7 @@ MULTICA_DAEMON_DEVICE_NAME="Your-Name's Runtime on Container"
 
 在当前目录创建 `docker-compose.yml`，按本机实际路径修改 `volumes`：
 
-```yaml{4,18-23}
+```yaml
 services:
   runtime:
     image: ghcr.io/i94m/view:php8.4-multica
@@ -137,12 +138,14 @@ services:
     environment:
       VIEW_CODE_PATH: /opt/tk
       AI_ASSET_PATH: /opt/ai_asset
+      VIEW_USER_MANUAL: /opt/view_user_menual
       AIR_PLATFORM_PATH: /opt/air_platform
       VIEW_SQL_PATH: /opt/db_change_scripts
       AUTO_TESTING_PATH: /opt/auto_testing
     volumes:
       - ${HOST_VIEW_PATH}:/opt/tk
       - ${HOST_ASSET_PATH}:/opt/ai_asset
+      - ${HOST_VIEW_USER_MANUAL_PATH}:/opt/view_user_menual
       - ${HOST_AIR_PLATFORM_PATH}:/opt/air_platform
       - ${HOST_VIEW_SQL_PATH}:/opt/db_change_scripts
       - ${HOST_AUTO_TESTING_PATH}:/opt/auto_testing

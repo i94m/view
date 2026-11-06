@@ -31,12 +31,12 @@ Desktop 默认连接 Multica Cloud。连接**自托管实例**时，在用户目
 ```json
 {
   "schemaVersion": 1,
-  "apiUrl": "http://210.74.156.242:3456"
+  "apiUrl": "http://multica.gyouths.cn:3456"
 }
 ```
 
 - `schemaVersion`：固定填 `1`。
-- `apiUrl`：自托管实例地址，与 `.env` 里的 `MULTICA_SERVER_URL` 一致；本项目为 `http://210.74.156.242:3456`。
+- `apiUrl`：自托管实例地址，与 `.env` 里的 `MULTICA_SERVER_URL` 一致；本项目为 `http://multica.gyouths.cn:3456`。
 
 改完重启 Desktop 生效。
 
@@ -44,8 +44,8 @@ Desktop 默认连接 Multica Cloud。连接**自托管实例**时，在用户目
 
 ```bash
 multica setup self-host \
-  --server-url http://210.74.156.242:3456 \
-  --app-url    http://210.74.156.242:3456
+  --server-url http://multica.gyouths.cn:3456 \
+  --app-url    http://multica.gyouths.cn:3456
 ```
 
 ## 容器
@@ -54,8 +54,8 @@ multica setup self-host \
 
 ```bash
 docker exec -it multica-runtime multica setup self-host \
-  --server-url http://210.74.156.242:3456 \
-  --app-url    http://210.74.156.242:3456
+  --server-url http://multica.gyouths.cn:3456 \
+  --app-url    http://multica.gyouths.cn:3456
 ```
 
 ## 确认状态

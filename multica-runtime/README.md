@@ -48,8 +48,8 @@ runtime 镜像后，执行 `docker exec multica-runtime opencode mcp add agentme
 
 ```bash
 docker exec -it multica-runtime multica setup self-host \
-  --server-url http://210.74.156.242:3456 \
-  --app-url    http://210.74.156.242:3456
+  --server-url http://multica.gyouths.cn:3456 \
+  --app-url    http://multica.gyouths.cn:3456
 ```
 
 会配置 CLI + 登录 + 启动 daemon；登录态持久化在 `./.multica`，重建容器无需重配。
@@ -75,14 +75,14 @@ docker exec -it multica-runtime bash     # 进容器
 连接执行电脑
 1.安装
 macOS / Linux
-curl -fsSL http://210.74.156.242:8008/multica/install.sh | bash
+curl -fsSL http://multica.gyouths.cn:8008/multica/install.sh | bash
 Windows PowerShell
-iwr http://210.74.156.242:8008/multica/install.ps1 | iex
+iwr http://multica.gyouths.cn:8008/multica/install.ps1 | iex
  
 2.连接
 multica setup self-host \
-  --server-url http://210.74.156.242:3456 \
-  --app-url    http://210.74.156.242:3456
+  --server-url http://multica.gyouths.cn:3456 \
+  --app-url    http://multica.gyouths.cn:3456
  
 3.确认连接状态：
 multica daemon status

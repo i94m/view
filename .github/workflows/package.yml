@@ -7,6 +7,7 @@ name: Package images
 # 触发：
 #   - push main 且改动 docker/base/**        → 重建 base，并连带重建 runtime
 #   - push main 且改动 docker/runtime/**     → 只重建 runtime（base 直接用现成的 tag）
+#   - push main 且改动本工作流             → 只重建 runtime（除非显式要求重建 base）
 #   - push tag v*                            → 忽略路径过滤，两个都重建（发版）
 #   - workflow_dispatch                      → 手动强制重建
 #
@@ -58,7 +59,6 @@ jobs:
           filters: |
             base:
               - 'docker/base/**'
-              - '.github/workflows/package.yml'
             runtime:
               - 'docker/runtime/**'
               - '.github/workflows/package.yml'

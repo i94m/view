@@ -10,6 +10,8 @@ docker-compose.yml
 .multica/
 multica/
 workspace/
+preview-sites/*
+!preview-sites/00-placeholder.conf
 opencode/
 opencode-config/*
 !opencode-config/skills/

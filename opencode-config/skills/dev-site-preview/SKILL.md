@@ -48,8 +48,8 @@ view-wt prune                 # 清失效元数据
 ```
 
 - `up`（不带参）：基于**当前目录/当前 worktree**直接建站——生成站点根 `/opt/preview-<name>`、
-  写 `/etc/nginx/conf.d/<name>.conf`（`server_name <name>.<domain>`、`listen 80`），
-  加 `/etc/hosts` 解析，`nginx -t` 后 reload。
+  写 `/etc/nginx/preview-sites/<name>.conf`（`server_name <name>.<domain>`、`listen 80`），
+  加 `/etc/hosts` 解析，`nginx -t` 后 reload。幂等：重跑会复用/重建。
 - `up <分支|commit>`：新建 worktree 到 `/opt/worktrees/<name>` 再建站。
 - **子域名前缀**默认取当前分支名（`feature/foo` → `feature-foo`），提交/非分支退化为短 SHA，
   可用 `--name` 指定唯一前缀；**域名**用 `--domain` 任意指定，默认 `localhost`（`VIEW_WT_DOMAIN`）。

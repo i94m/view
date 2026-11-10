@@ -106,10 +106,11 @@ COPY src/pdflib.ini /etc/php/8.4/fpm/conf.d/pdflib.ini
 
 # 配置 nginx：单文件整体替换 Debian 默认 nginx.conf（不 include sites-enabled）。
 # apache 与 8 个 .htaccess 的每条规则都在里面逐条等价搬迁，对照表见 src/nginx/README.md。
-# http{} 内额外 include /etc/nginx/conf.d/*.conf —— view-wt 为每个 worktree 写一个
-# server 块到这里（00-placeholder.conf 保证空目录时通配仍命中一个文件）。
+# http{} 内额外 include conf.d（通用）与 preview-sites（预览站点专用）两个目录——
+# view-wt 为每个 worktree 写一个 server 块到 preview-sites（各有 00-placeholder.conf 兜底）。
 COPY src/nginx/nginx.conf /etc/nginx/nginx.conf
 COPY src/nginx/conf.d /etc/nginx/conf.d
+COPY src/nginx/preview-sites /etc/nginx/preview-sites
 # 构建期验证语法；nginx -t 会顺手创建空 pid 文件，删掉别烘进镜像
 RUN nginx -t && rm -f /run/nginx.pid
 

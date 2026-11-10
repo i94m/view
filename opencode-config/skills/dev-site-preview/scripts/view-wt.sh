@@ -15,7 +15,7 @@
 #
 # 每个站点四件套：
 #   站点根    /opt/preview-<name>            （SITE/REPO 覆盖后跑 /run/site-init.sh）
-#   nginx 块  /etc/nginx/conf.d/<name>.conf  （server_name <name>.<domain>，listen 80）
+#   nginx 块  /etc/nginx/preview-sites/<name>.conf  （server_name <name>.<domain>，listen 80）
 #   宿主解析  /etc/hosts 增加 127.0.0.1 <name>.<domain> # view-wt
 #   状态      /var/lib/view-worktrees/<name>.{domain,repo}
 #
@@ -23,7 +23,8 @@
 # 域名（domain）任意，默认 localhost（环境变量 VIEW_WT_DOMAIN 或 --domain 覆盖）。
 # 所有站点都 listen 80，靠 server_name 路由；主站点 server_name localhost + default_server 兜底。
 #
-# 主站点与主检出 /opt/tk 全程不动。站点/conf/hosts/state 在容器临时层，容器重建后丢失；
+# 主站点与主检出 /opt/tk 全程不动。站点根/state 在容器临时层，重建后丢失；conf 在
+# /etc/nginx/preview-sites（可映射到宿主持久化）。up 幂等：重跑复用/重建，恢复站点。
 # /opt/tk/.git/worktrees 元数据在 bind mount 上，重建后用 view-wt prune 清。
 set -euo pipefail
 # macOS/bash 会把全角字符（如 （）「」）的字节当字母，导致 `$var（` 被误解析成变量名
@@ -33,7 +34,7 @@ export LC_ALL=C
 MAIN_REPO=${MAIN_REPO:-/opt/tk}
 WORKTREE_ROOT=${WORKTREE_ROOT:-/opt/worktrees}
 PREVIEW_PREFIX=${PREVIEW_PREFIX:-/opt/preview}
-NGINX_CONF_DIR=${NGINX_CONF_DIR:-/etc/nginx/conf.d}
+NGINX_CONF_DIR=${NGINX_CONF_DIR:-/etc/nginx/preview-sites}
 SITE_INIT=${SITE_INIT:-/run/site-init.sh}
 DOMAIN=${VIEW_WT_DOMAIN:-localhost}
 HOSTS_FILE=${HOSTS_FILE:-/etc/hosts}
@@ -198,7 +199,6 @@ cmd_up() {
     [ -n "$name" ] || die "无法从「$ref」生成合法前缀，请用 --name 指定"
     wt_dir="$WORKTREE_ROOT/$name"
     repo="$wt_dir"
-    [ -e "$wt_dir" ] && die "worktree 已存在：$wt_dir（先 view-wt down $name）"
   else
     # 方式二：基于当前目录（当前 worktree）快速搭建
     name=$(current_name "$name")
@@ -207,22 +207,25 @@ cmd_up() {
   fi
 
   local site="$PREVIEW_PREFIX-$name"
-  [ -e "$site" ]  && die "站点根已存在：$site"
-  [ -f "$NGINX_CONF_DIR/$name.conf" ] && die "nginx 配置已存在：$NGINX_CONF_DIR/$name.conf"
 
+  # 幂等：conf / 站点根 / worktree 已存在时覆盖或复用（容器重建后重跑 up 即可恢复）
   mkdir -p "$WORKTREE_ROOT" "$NGINX_CONF_DIR" "$STATE_DIR"
 
   if [ -n "$ref" ]; then
-    log "创建 worktree：$wt_dir <- $ref"
-    local git_err="/tmp/view-wt.$$.err"
-    if [ "$detach" -eq 1 ]; then
-      git -C "$MAIN_REPO" worktree add --detach "$wt_dir" "$ref" 2>"$git_err" \
-        || { sed 's/^/  /' "$git_err" >&2; rm -f "$git_err"; die "worktree add 失败"; }
+    if [ -e "$wt_dir" ]; then
+      log "复用已存在的 worktree：$wt_dir"
     else
-      git -C "$MAIN_REPO" worktree add "$wt_dir" "$ref" 2>"$git_err" \
-        || { sed 's/^/  /' "$git_err" >&2; rm -f "$git_err"; die "worktree add 失败（若分支已被占用，加 --detach）"; }
+      log "创建 worktree：$wt_dir <- $ref"
+      local git_err="/tmp/view-wt.$$.err"
+      if [ "$detach" -eq 1 ]; then
+        git -C "$MAIN_REPO" worktree add --detach "$wt_dir" "$ref" 2>"$git_err" \
+          || { sed 's/^/  /' "$git_err" >&2; rm -f "$git_err"; die "worktree add 失败"; }
+      else
+        git -C "$MAIN_REPO" worktree add "$wt_dir" "$ref" 2>"$git_err" \
+          || { sed 's/^/  /' "$git_err" >&2; rm -f "$git_err"; die "worktree add 失败（若分支已被占用，加 --detach）"; }
+      fi
+      rm -f "$git_err"
     fi
-    rm -f "$git_err"
   else
     log "基于当前目录：$repo"
   fi
@@ -280,7 +283,7 @@ view-wt —— 容器内用 git worktree 搭独立预览站点（自测用，不
   view-wt up [<分支|commit>] [--name N] [--domain D] [--detach]
       带参：新建 worktree 到 /opt/worktrees/<N> 再建站；
       不带参：基于当前目录（当前 worktree）快速建站。
-      生成 /opt/preview-<N>，写 /etc/nginx/conf.d/<N>.conf（server_name <N>.<D>），
+      生成 /opt/preview-<N>，写 /etc/nginx/preview-sites/<N>.conf（server_name <N>.<D>），
       加 /etc/hosts 解析，reload nginx。
       前缀 <N> 默认取分支名（提交/非分支退化为短 SHA），域名 <D> 默认 localhost。
       访问地址：http://<N>.<D>/（容器内直接可达；外部需 DNS 泛解析 + 宿主 80 转发到容器 80）

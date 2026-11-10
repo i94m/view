@@ -35,6 +35,8 @@ services:
       - ./workspace:/root/multica_workspaces
       - ./opencode-config:/root/.config/opencode
       - ./opencode-data:/root/.local/share/opencode
+      # 预览站点 nginx 配置（view-wt 写入 /etc/nginx/preview-sites，映射到宿主持久化）
+      - ./preview-sites:/etc/nginx/preview-sites
     ports:
       - "8080:80"
     networks:

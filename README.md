@@ -189,7 +189,7 @@ multica login --token <TOKEN>        # 手动登录
 OpenCode skill `dev-site-preview`（`opencode-config/skills/dev-site-preview/`）自带脚本
 `scripts/view-wt.sh`，用 git worktree 把任意分支/提交检出到独立目录，生成独立预览站点并挂到
 独立**子域名**，自测分支代码而不动 `/opt/tk` 主检出与主站点。镜像侧只提供 nginx 的
-`include conf.d/*.conf` + `default_server`、以及 `site-init.sh` 的 `SITE/REPO` 覆盖。
+`include conf.d/*.conf` + `include preview-sites/*.conf` + `default_server`、以及 `site-init.sh` 的 `SITE/REPO` 覆盖。
 
 ```bash
 install -m 0755 <skill>/scripts/view-wt.sh /usr/local/bin/view-wt   # 首次安装
@@ -203,15 +203,15 @@ view-wt prune                                           # 容器重建后清理�
 ```
 
 - `up`（不带参）基于**当前目录/当前 worktree**建站，前缀取当前分支名；带参则新建 worktree。
-- 站点根 `/opt/preview-<name>`，nginx 块 `/etc/nginx/conf.d/<name>.conf`（`server_name
+- 站点根 `/opt/preview-<name>`，nginx 块 `/etc/nginx/preview-sites/<name>.conf`（`server_name
   <name>.<domain>`、`listen 80`，主站点为 `default_server` 兜底），并写 `/etc/hosts` 的
-  `127.0.0.1 <name>.<domain>`。
+  `127.0.0.1 <name>.<domain>`。`preview-sites` 映射到宿主 `./preview-sites` 持久化。
 - **访问**：容器内自测 `http://<name>.<domain>/`；外部子域名同样 `http://<name>.<domain>/`
   （不占端口，靠子域名区分；需 `*.<domain>` 解析到宿主 IP，且宿主 80 端口转发到容器 80）。
 - **前缀**默认取分支名（提交/非分支退化为短 SHA），可用 `--name` 指定唯一前缀；
   **域名**用 `--domain` 任意指定，默认 `localhost`（`VIEW_WT_DOMAIN` 覆盖）。
-- 站点根 / conf / hosts / state 在容器临时层，容器重建即丢（`.git/worktrees` 元数据残留用
-  `view-wt prune` 清）；需要跨重建保留时把 worktree 目录落到已挂载卷。
+- conf 映射到宿主 `./preview-sites`（持久化）；站点根 / hosts / state 仍在容器临时层，重建即丢。
+  `up` 幂等：重建后重跑 `view-wt up <name>` 即可恢复（`.git/worktrees` 元数据用 `view-wt prune` 清）。
 
 **宿主机 + docker/podman 的轻量预览**（runtime 不在容器时）：用 skill 自带的
 `scripts/host-preview.sh`，拉基础镜像 `ghcr.io/i94m/view:php8.4` 起单容器预览环境。

@@ -65,51 +65,6 @@ MULTICA_DAEMON_DEVICE_NAME="Example team's runtime"
 
 ## 3. 保存 docker-compose.yml 并启动
 
-先准备 Playwright 容器的启动脚本（清理残留单例锁 + 转发退出信号），放在 compose 同目录：
-
-```bash
-cat > playwright-entrypoint.sh <<'EOF'
-#!/bin/sh
-set -eu
-
-PROFILE="${PLAYWRIGHT_PROFILE:-/data/profile}"
-mkdir -p "$PROFILE"
-
-cleanup_locks() {
-    rm -f "$PROFILE/SingletonLock" "$PROFILE/SingletonCookie" "$PROFILE/SingletonSocket"
-}
-
-# 上个容器被强杀/宿主机重启后，单例锁会留在挂载目录里，导致新实例报
-# "Browser is already in use for /data/profile"
-cleanup_locks
-
-node /app/cli.js "$@" &
-child=$!
-
-term() {
-    kill -TERM "$child" 2>/dev/null || true
-    waited=0
-    while kill -0 "$child" 2>/dev/null && [ "$waited" -lt 20 ]; do
-        waited=$((waited + 1))
-        sleep 0.5
-    done
-    kill -KILL "$child" 2>/dev/null || true
-    wait "$child" 2>/dev/null || true
-    cleanup_locks
-    exit 0
-}
-trap term TERM INT
-
-status=0
-wait "$child" || status=$?
-cleanup_locks
-exit "$status"
-EOF
-chmod +x playwright-entrypoint.sh
-```
-
-（仓库内的对应文件：`docker/playwright/entrypoint.sh`。）
-
 ```yaml
 services:
   multica:
@@ -153,8 +108,12 @@ services:
     init: true
     # 以 root 运行：需要穿过 /root（0700）访问挂载进来的工作区
     user: "0:0"
-    # 启动前清理残留的 Chromium 单例锁，退出时再清理一次
-    entrypoint: ["/bin/sh", "/entrypoint.sh"]
+    # 启动前清理上次异常退出留下的 Chromium 单例锁
+    entrypoint:
+      - /bin/sh
+      - -c
+      - rm -f /data/profile/Singleton*; exec node /app/cli.js "$$@"
+      - --
     volumes:
       # 复用宿主机已安装的 Chromium
       - /root/.cache/ms-playwright/chromium-1208:/host-chromium:ro
@@ -162,8 +121,6 @@ services:
       - ./playwright-output:/root/playwright-output
       # 浏览器 profile（cookie / localStorage）持久化，容器重建不丢
       - ./playwright-profile:/data/profile
-      # 单例锁清理 + 信号转发脚本（放在 compose 同目录）
-      - ./playwright-entrypoint.sh:/entrypoint.sh:ro
     command:
       - "--headless"
       - "--browser"
@@ -182,8 +139,6 @@ services:
       - "0.0.0.0"
       - "--allowed-hosts"
       - "*"
-    # 给浏览器留出优雅退出的时间，配合 entrypoint 清理单例锁
-    stop_grace_period: 30s
     restart: unless-stopped
 ```
 

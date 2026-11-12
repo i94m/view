@@ -176,17 +176,19 @@ docker run --rm -v "$PWD/playwright-profile:/data/profile" alpine \
   rm -f /data/profile/SingletonLock /data/profile/SingletonCookie /data/profile/SingletonSocket
 ```
 
-长期方案：在容器入口处清理一次，并把 SIGTERM 转发给浏览器进程。参考仓库里的
-`docker/playwright/entrypoint.sh`：
+长期方案只加一行 `entrypoint`，启动前清掉残留锁，不需要额外脚本：
 
 ```yaml
 services:
   playwright:
     image: mcr.microsoft.com/playwright/mcp:latest
-    entrypoint: ["/bin/sh", "/entrypoint.sh"]
+    entrypoint:
+      - /bin/sh
+      - -c
+      - rm -f /data/profile/Singleton*; exec node /app/cli.js "$$@"
+      - --
     volumes:
       - ./playwright-profile:/data/profile
-      - ./playwright-entrypoint.sh:/entrypoint.sh:ro
     command:
       - "--headless"
       - "--browser"
@@ -200,9 +202,7 @@ services:
       - "0.0.0.0"
 ```
 
-脚本会在启动 `cli.js` 前删除残留的 `Singleton*`，并在收到 `SIGTERM`/`SIGINT`
-时等待浏览器退出后再清理一次，保证 `docker compose stop/down` 不会留下锁。
-
-另外建议加 `stop_grace_period: 30s`，给浏览器留出优雅退出的时间。
+`$$@` 是 compose 的转义写法（`$$` → `$`），把 `command` 的参数原样传给 `cli.js`。
+这样每次容器启动都会先删除 `SingletonLock/Cookie/Socket`，宿主机重启后也能自动恢复。
 
 官方文档：[Playwright MCP › Docker](https://github.com/microsoft/playwright-mcp#docker)。

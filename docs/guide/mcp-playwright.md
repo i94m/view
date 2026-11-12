@@ -76,10 +76,14 @@
 在容器里跑 opencode 时，另起一个独立 Playwright 容器，opencode 用远程地址连过去：
 
 ```bash
+mkdir -p ~/playwright-profile
 docker run -d -i --rm --init --pull=always \
   --entrypoint node --name playwright -p 8931:8931 \
+  -v ~/playwright-profile:/data/profile \
   mcr.microsoft.com/playwright/mcp \
-  /app/cli.js --headless --browser chromium --no-sandbox --port 8931 --host 0.0.0.0
+  /app/cli.js --headless --browser chromium --no-sandbox \
+  --user-data-dir /data/profile \
+  --port 8931 --host 0.0.0.0
 ```
 
 ```json
@@ -101,5 +105,55 @@ docker run -d -i --rm --init --pull=always \
 - 同一 docker 网络时用容器名：`http://playwright:8931/mcp`。
 - 单 runtime 场景可以让 Playwright 容器独立运行；用[小队](/guide/squads)时，它是 compose 里的 `playwright` 服务，随小队一起启动，不需要映射宿主机端口。
 :::
+
+## 登录态持久化（cookie）
+
+Playwright MCP 默认是持久化 profile，但写在**容器内部**：
+
+```text
+/root/.cache/ms-playwright/mcp-{channel}-{workspace-hash}
+```
+
+这带来两个问题：
+
+1. 容器 `--rm` 或 compose 重建后目录消失，登录态、cookie 全部丢失；
+2. `{workspace-hash}` 由 MCP 客户端的 workspace root 计算，换项目目录就是另一个 profile。
+
+要跨重启保留登录态，显式指定 `--user-data-dir` 并挂载到宿主机：
+
+```yaml
+services:
+  playwright:
+    image: mcr.microsoft.com/playwright/mcp:latest
+    entrypoint: ["node", "/app/cli.js"]
+    volumes:
+      - ./playwright-profile:/data/profile
+    command:
+      - "--headless"
+      - "--browser"
+      - "chromium"
+      - "--no-sandbox"
+      - "--user-data-dir"
+      - "/data/profile"
+      - "--port"
+      - "8931"
+      - "--host"
+      - "0.0.0.0"
+```
+
+目录里是完整的 Chromium profile，关键内容：
+
+| 内容 | 文件 |
+|---|---|
+| Cookie（登录态） | `Default/Cookies`（SQLite） |
+| localStorage / IndexedDB | `Default/Local Storage`、`Default/IndexedDB` |
+| 浏览器设置 / 指纹 | `Local State` 等 |
+
+注意：
+
+- **不要加 `--isolated`**，它把 profile 放在内存，不会写盘。
+- 一个持久 profile 同时只能被一个浏览器实例使用；需要并行时用 `--isolated` 或给每个实例分配不同的 `--user-data-dir`。
+- 想重置登录态：停掉容器，删除 `./playwright-profile` 后重新启动。
+- 只想预置 cookie 而不共享整个 profile：用 `--storage-state <path>`（通常配合 `--isolated`）。
 
 官方文档：[Playwright MCP › Docker](https://github.com/microsoft/playwright-mcp#docker)。

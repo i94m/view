@@ -18,6 +18,7 @@
 - 宿主机已装好 Docker 与 Docker Compose v2。
 - 共享代码目录与预览站点 `config.php` 已就绪（例如 `/opt/view/dev` 等），具体路径在下一步 `.env` 里填。
 - 宿主机已准备 Playwright Chromium 缓存 `/root/.cache/ms-playwright/chromium-1208`；版本或路径不同时，修改 `playwright` 的挂载与 `--executable-path`。
+- 浏览器 profile 目录 `./playwright-profile` 会在首次启动时自动创建，用于持久化登录 cookie。
 
 ## 1. 规划成员
 
@@ -113,6 +114,8 @@ services:
       - /root/.cache/ms-playwright/chromium-1208:/host-chromium:ro
       # 与 --output-dir 保持一致
       - ./playwright-output:/root/playwright-output
+      # 浏览器 profile（cookie / localStorage）持久化，容器重建不丢
+      - ./playwright-profile:/data/profile
     command:
       - "--headless"
       - "--browser"
@@ -123,6 +126,8 @@ services:
       - "--allow-unrestricted-file-access"
       - "--output-dir"
       - "/root/playwright-output"
+      - "--user-data-dir"
+      - "/data/profile"
       - "--port"
       - "8931"
       - "--host"
@@ -135,6 +140,10 @@ services:
 - 两个服务按 compose 默认网络用服务名互访，Playwright MCP 地址是 `http://playwright:8931/mcp`，不需要暴露宿主机端口。
 - 小队共用一套 `./.multica`、`./workspace`、`./opencode-config`、`./opencode-data`，登录和模型只配一次。
 - `./playwright-output` 由 `playwright` 写入、`multica` 只读挂载，MCP 返回的截图/快照路径可以直接读取。
+- `./playwright-profile` 保存浏览器 profile（`Default/Cookies`、`Local Storage` 等），
+  `docker compose down && up` 或重建容器后登录态仍在；所有小队成员共用同一份 cookie。
+  容器以 root 运行，该目录文件属主也是 root；需要重置时停容器并删除该目录，
+  不要同时给 MCP 加 `--isolated`。
 - `8080:80` 仅供浏览器查看预览站点，可按需删掉。
 
 ```bash
@@ -202,4 +211,6 @@ docker compose exec multica bash
 
 - daemon 日志：`docker compose exec multica tail -f /root/.multica/daemon.log`
 - Playwright 异常：`docker compose logs -f playwright`
+- 重置浏览器登录态（清 cookie）：`docker compose stop playwright && rm -rf ./playwright-profile && docker compose start playwright`
+- 备份登录态：停掉 `playwright` 后打包 `./playwright-profile`；该目录含有效 cookie，注意不要提交到 git
 - 修改 `opencode-config` 后重启 `multica` 生效；重启会中断正在运行的任务。

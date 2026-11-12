@@ -65,6 +65,51 @@ MULTICA_DAEMON_DEVICE_NAME="Example team's runtime"
 
 ## 3. 保存 docker-compose.yml 并启动
 
+先准备 Playwright 容器的启动脚本（清理残留单例锁 + 转发退出信号），放在 compose 同目录：
+
+```bash
+cat > playwright-entrypoint.sh <<'EOF'
+#!/bin/sh
+set -eu
+
+PROFILE="${PLAYWRIGHT_PROFILE:-/data/profile}"
+mkdir -p "$PROFILE"
+
+cleanup_locks() {
+    rm -f "$PROFILE/SingletonLock" "$PROFILE/SingletonCookie" "$PROFILE/SingletonSocket"
+}
+
+# 上个容器被强杀/宿主机重启后，单例锁会留在挂载目录里，导致新实例报
+# "Browser is already in use for /data/profile"
+cleanup_locks
+
+node /app/cli.js "$@" &
+child=$!
+
+term() {
+    kill -TERM "$child" 2>/dev/null || true
+    waited=0
+    while kill -0 "$child" 2>/dev/null && [ "$waited" -lt 20 ]; do
+        waited=$((waited + 1))
+        sleep 0.5
+    done
+    kill -KILL "$child" 2>/dev/null || true
+    wait "$child" 2>/dev/null || true
+    cleanup_locks
+    exit 0
+}
+trap term TERM INT
+
+status=0
+wait "$child" || status=$?
+cleanup_locks
+exit "$status"
+EOF
+chmod +x playwright-entrypoint.sh
+```
+
+（仓库内的对应文件：`docker/playwright/entrypoint.sh`。）
+
 ```yaml
 services:
   multica:
@@ -108,7 +153,8 @@ services:
     init: true
     # 以 root 运行：需要穿过 /root（0700）访问挂载进来的工作区
     user: "0:0"
-    entrypoint: ["node", "/app/cli.js"]
+    # 启动前清理残留的 Chromium 单例锁，退出时再清理一次
+    entrypoint: ["/bin/sh", "/entrypoint.sh"]
     volumes:
       # 复用宿主机已安装的 Chromium
       - /root/.cache/ms-playwright/chromium-1208:/host-chromium:ro
@@ -116,6 +162,8 @@ services:
       - ./playwright-output:/root/playwright-output
       # 浏览器 profile（cookie / localStorage）持久化，容器重建不丢
       - ./playwright-profile:/data/profile
+      # 单例锁清理 + 信号转发脚本（放在 compose 同目录）
+      - ./playwright-entrypoint.sh:/entrypoint.sh:ro
     command:
       - "--headless"
       - "--browser"
@@ -134,6 +182,8 @@ services:
       - "0.0.0.0"
       - "--allowed-hosts"
       - "*"
+    # 给浏览器留出优雅退出的时间，配合 entrypoint 清理单例锁
+    stop_grace_period: 30s
     restart: unless-stopped
 ```
 
@@ -144,6 +194,17 @@ services:
   `docker compose down && up` 或重建容器后登录态仍在；所有小队成员共用同一份 cookie。
   容器以 root 运行，该目录文件属主也是 root；需要重置时停容器并删除该目录，
   不要同时给 MCP 加 `--isolated`。
+- 重启后若 Playwright 报 `Browser is already in use for /data/profile`，是上次实例被强杀
+  留下的 `SingletonLock`；上面的 entrypoint 会在启动时自动清理。已卡住时手动恢复：
+
+  ```bash
+  docker compose stop playwright
+  # 确认没有第二个容器还在挂载这个 profile：docker ps | grep playwright
+  rm -f ./playwright-profile/SingletonLock ./playwright-profile/SingletonCookie ./playwright-profile/SingletonSocket
+  docker compose start playwright
+  ```
+
+  `browser_close` 只是关页面，不会杀浏览器进程，也不能释放这个锁。
 - `8080:80` 仅供浏览器查看预览站点，可按需删掉。
 
 ```bash

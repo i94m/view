@@ -156,4 +156,53 @@ services:
 - 想重置登录态：停掉容器，删除 `./playwright-profile` 后重新启动。
 - 只想预置 cookie 而不共享整个 profile：用 `--storage-state <path>`（通常配合 `--isolated`）。
 
+### 重启后报 `Browser is already in use for /data/profile`
+
+这是 Chromium 的单例锁残留：容器被强杀或宿主机重启时，profile 目录里会留下
+`SingletonLock` / `SingletonCookie` / `SingletonSocket`。锁里记录的是旧容器的
+`<hostname>-<pid>`，新容器里这个 pid 可能又被占用，Chromium 就误判为已有实例。
+
+`browser_close` 只关闭页面，不会杀掉浏览器进程，也无法释放这个锁。恢复方法：
+
+```bash
+# 先确认没有第二个容器/实例在用同一个 profile
+docker ps | grep playwright
+
+# 宿主机能直接访问挂载目录时
+rm -f ./playwright-profile/SingletonLock ./playwright-profile/SingletonCookie ./playwright-profile/SingletonSocket
+
+# 或用一次性容器清理（路径与 compose 的挂载保持一致）
+docker run --rm -v "$PWD/playwright-profile:/data/profile" alpine \
+  rm -f /data/profile/SingletonLock /data/profile/SingletonCookie /data/profile/SingletonSocket
+```
+
+长期方案：在容器入口处清理一次，并把 SIGTERM 转发给浏览器进程。参考仓库里的
+`docker/playwright/entrypoint.sh`：
+
+```yaml
+services:
+  playwright:
+    image: mcr.microsoft.com/playwright/mcp:latest
+    entrypoint: ["/bin/sh", "/entrypoint.sh"]
+    volumes:
+      - ./playwright-profile:/data/profile
+      - ./playwright-entrypoint.sh:/entrypoint.sh:ro
+    command:
+      - "--headless"
+      - "--browser"
+      - "chromium"
+      - "--no-sandbox"
+      - "--user-data-dir"
+      - "/data/profile"
+      - "--port"
+      - "8931"
+      - "--host"
+      - "0.0.0.0"
+```
+
+脚本会在启动 `cli.js` 前删除残留的 `Singleton*`，并在收到 `SIGTERM`/`SIGINT`
+时等待浏览器退出后再清理一次，保证 `docker compose stop/down` 不会留下锁。
+
+另外建议加 `stop_grace_period: 30s`，给浏览器留出优雅退出的时间。
+
 官方文档：[Playwright MCP › Docker](https://github.com/microsoft/playwright-mcp#docker)。

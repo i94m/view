@@ -76,10 +76,10 @@
 在容器里跑 opencode 时，另起一个独立 Playwright 容器，opencode 用远程地址连过去：
 
 ```bash
-mkdir -p ~/playwright-profile
+mkdir -p ~/playwright-default
 docker run -d -i --rm --init --pull=always \
   --entrypoint node --name playwright -p 8931:8931 \
-  -v ~/playwright-profile:/data/profile \
+  -v ~/playwright-default:/data/profile/Default \
   mcr.microsoft.com/playwright/mcp \
   /app/cli.js --headless --browser chromium --no-sandbox \
   --user-data-dir /data/profile \
@@ -108,26 +108,19 @@ docker run -d -i --rm --init --pull=always \
 
 ## 登录态持久化（cookie）
 
-Playwright MCP 默认是持久化 profile，但写在**容器内部**：
+Playwright MCP 默认把 profile 写在容器内部
+（`/root/.cache/ms-playwright/mcp-{channel}-{workspace-hash}`），容器重建就丢，
+且 hash 随 workspace 变化。
 
-```text
-/root/.cache/ms-playwright/mcp-{channel}-{workspace-hash}
-```
-
-这带来两个问题：
-
-1. 容器 `--rm` 或 compose 重建后目录消失，登录态、cookie 全部丢失；
-2. `{workspace-hash}` 由 MCP 客户端的 workspace root 计算，换项目目录就是另一个 profile。
-
-要跨重启保留登录态，显式指定 `--user-data-dir` 并挂载到宿主机：
+最省事的做法：固定 `--user-data-dir`，但**只挂载 `Default` 子目录**：
 
 ```yaml
 services:
   playwright:
     image: mcr.microsoft.com/playwright/mcp:latest
-    entrypoint: ["node", "/app/cli.js"]
     volumes:
-      - ./playwright-profile:/data/profile
+      # 只持久化 Default：cookie / localStorage / IndexedDB 都在这里
+      - ./playwright-default:/data/profile/Default
     command:
       - "--headless"
       - "--browser"
@@ -141,68 +134,48 @@ services:
       - "0.0.0.0"
 ```
 
-目录里是完整的 Chromium profile，关键内容：
+为什么只挂 `Default`：
 
-| 内容 | 文件 |
-|---|---|
-| Cookie（登录态） | `Default/Cookies`（SQLite） |
-| localStorage / IndexedDB | `Default/Local Storage`、`Default/IndexedDB` |
-| 浏览器设置 / 指纹 | `Local State` 等 |
+| 内容 | 位置 | 是否持久化 |
+|---|---|---|
+| Cookie（登录态） | `Default/Network/Cookies`（部分版本 `Default/Cookies`） | ✅ |
+| localStorage / IndexedDB | `Default/Local Storage`、`Default/IndexedDB` | ✅ |
+| 单例锁 | profile 根目录 `SingletonLock` 等 | ❌ 随容器层消失 |
+
+这样既保留登录 cookie，又天然避开 `Browser is already in use for /data/profile`：
+锁在 `/data/profile` 根目录，每次重建都是新的。Playwright 启动 Chromium 时使用
+`--password-store=basic`，cookie 加密密钥固定，不依赖根目录的 `Local State`。
 
 注意：
 
 - **不要加 `--isolated`**，它把 profile 放在内存，不会写盘。
-- 一个持久 profile 同时只能被一个浏览器实例使用；需要并行时用 `--isolated` 或给每个实例分配不同的 `--user-data-dir`。
-- 想重置登录态：停掉容器，删除 `./playwright-profile` 后重新启动。
+- 一个 profile 同时只能被一个浏览器实例使用；需要并行时给每个实例分配不同的 `--user-data-dir`。
+- 想重置登录态：停掉容器，删除 `./playwright-default` 后重新启动。
 - 只想预置 cookie 而不共享整个 profile：用 `--storage-state <path>`（通常配合 `--isolated`）。
 
-### 重启后报 `Browser is already in use for /data/profile`
+### 如果挂载了整个 profile
 
-这是 Chromium 的单例锁残留：容器被强杀或宿主机重启时，profile 目录里会留下
-`SingletonLock` / `SingletonCookie` / `SingletonSocket`。锁里记录的是旧容器的
-`<hostname>-<pid>`，新容器里这个 pid 可能又被占用，Chromium 就误判为已有实例。
+若把 `./playwright-profile:/data/profile` 整个挂上，强杀或宿主机重启会留下
+`SingletonLock` / `SingletonCookie` / `SingletonSocket`，下次启动报
+`Browser is already in use`。锁里记录旧容器的 `<hostname>-<pid>`，新容器里
+pid 可能又被占用。`browser_close` 只关页面，不会杀浏览器进程，也释放不了锁。
 
-`browser_close` 只关闭页面，不会杀掉浏览器进程，也无法释放这个锁。恢复方法：
+恢复：
 
 ```bash
-# 先确认没有第二个容器/实例在用同一个 profile
-docker ps | grep playwright
-
-# 宿主机能直接访问挂载目录时
-rm -f ./playwright-profile/SingletonLock ./playwright-profile/SingletonCookie ./playwright-profile/SingletonSocket
-
-# 或用一次性容器清理（路径与 compose 的挂载保持一致）
-docker run --rm -v "$PWD/playwright-profile:/data/profile" alpine \
-  rm -f /data/profile/SingletonLock /data/profile/SingletonCookie /data/profile/SingletonSocket
+docker compose stop playwright
+rm -f ./playwright-profile/Singleton*
+docker compose start playwright
 ```
 
-长期方案只加一行 `entrypoint`，启动前清掉残留锁，不需要额外脚本：
+或在 entrypoint 启动前清一次：
 
 ```yaml
-services:
-  playwright:
-    image: mcr.microsoft.com/playwright/mcp:latest
-    entrypoint:
-      - /bin/sh
-      - -c
-      - rm -f /data/profile/Singleton*; exec node /app/cli.js "$$@"
-      - --
-    volumes:
-      - ./playwright-profile:/data/profile
-    command:
-      - "--headless"
-      - "--browser"
-      - "chromium"
-      - "--no-sandbox"
-      - "--user-data-dir"
-      - "/data/profile"
-      - "--port"
-      - "8931"
-      - "--host"
-      - "0.0.0.0"
+entrypoint:
+  - /bin/sh
+  - -c
+  - rm -f /data/profile/Singleton*; exec node /app/cli.js "$$@"
+  - --
 ```
-
-`$$@` 是 compose 的转义写法（`$$` → `$`），把 `command` 的参数原样传给 `cli.js`。
-这样每次容器启动都会先删除 `SingletonLock/Cookie/Socket`，宿主机重启后也能自动恢复。
 
 官方文档：[Playwright MCP › Docker](https://github.com/microsoft/playwright-mcp#docker)。

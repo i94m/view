@@ -18,7 +18,7 @@
 - 宿主机已装好 Docker 与 Docker Compose v2。
 - 共享代码目录与预览站点 `config.php` 已就绪（例如 `/opt/view/dev` 等），具体路径在下一步 `.env` 里填。
 - 宿主机已准备 Playwright Chromium 缓存 `/root/.cache/ms-playwright/chromium-1208`；版本或路径不同时，修改 `playwright` 的挂载与 `--executable-path`。
-- 浏览器 profile 目录 `./playwright-profile` 会在首次启动时自动创建，用于持久化登录 cookie。
+- 浏览器 profile 目录 `./playwright-default` 会在首次启动时自动创建，用于持久化登录 cookie。
 
 ## 1. 规划成员
 
@@ -108,19 +108,14 @@ services:
     init: true
     # 以 root 运行：需要穿过 /root（0700）访问挂载进来的工作区
     user: "0:0"
-    # 启动前清理上次异常退出留下的 Chromium 单例锁
-    entrypoint:
-      - /bin/sh
-      - -c
-      - rm -f /data/profile/Singleton*; exec node /app/cli.js "$$@"
-      - --
     volumes:
       # 复用宿主机已安装的 Chromium
       - /root/.cache/ms-playwright/chromium-1208:/host-chromium:ro
       # 与 --output-dir 保持一致
       - ./playwright-output:/root/playwright-output
-      # 浏览器 profile（cookie / localStorage）持久化，容器重建不丢
-      - ./playwright-profile:/data/profile
+      # 只持久化 Default 子目录：cookie / localStorage 都在这里，
+      # SingletonLock 在 profile 根目录，不会落盘，重启不会报占用
+      - ./playwright-default:/data/profile/Default
     command:
       - "--headless"
       - "--browser"
@@ -145,21 +140,11 @@ services:
 - 两个服务按 compose 默认网络用服务名互访，Playwright MCP 地址是 `http://playwright:8931/mcp`，不需要暴露宿主机端口。
 - 小队共用一套 `./.multica`、`./workspace`、`./opencode-config`、`./opencode-data`，登录和模型只配一次。
 - `./playwright-output` 由 `playwright` 写入、`multica` 只读挂载，MCP 返回的截图/快照路径可以直接读取。
-- `./playwright-profile` 保存浏览器 profile（`Default/Cookies`、`Local Storage` 等），
-  `docker compose down && up` 或重建容器后登录态仍在；所有小队成员共用同一份 cookie。
-  容器以 root 运行，该目录文件属主也是 root；需要重置时停容器并删除该目录，
-  不要同时给 MCP 加 `--isolated`。
-- 重启后若 Playwright 报 `Browser is already in use for /data/profile`，是上次实例被强杀
-  留下的 `SingletonLock`；上面的 entrypoint 会在启动时自动清理。已卡住时手动恢复：
-
-  ```bash
-  docker compose stop playwright
-  # 确认没有第二个容器还在挂载这个 profile：docker ps | grep playwright
-  rm -f ./playwright-profile/SingletonLock ./playwright-profile/SingletonCookie ./playwright-profile/SingletonSocket
-  docker compose start playwright
-  ```
-
-  `browser_close` 只是关页面，不会杀浏览器进程，也不能释放这个锁。
+- `./playwright-default` 只保存浏览器 profile 的 `Default/` 子目录（`Cookies`、
+  `Local Storage`、`IndexedDB`），容器重建后登录态仍在，所有小队成员共用同一份 cookie。
+  Chromium 的 `SingletonLock` 在 profile 根目录、不落盘，所以不会出现
+  `Browser is already in use`；容器以 root 运行，该目录文件属主也是 root。
+  需要重置登录态时停容器并删除该目录；不要同时给 MCP 加 `--isolated`。
 - `8080:80` 仅供浏览器查看预览站点，可按需删掉。
 
 ```bash
@@ -227,6 +212,6 @@ docker compose exec multica bash
 
 - daemon 日志：`docker compose exec multica tail -f /root/.multica/daemon.log`
 - Playwright 异常：`docker compose logs -f playwright`
-- 重置浏览器登录态（清 cookie）：`docker compose stop playwright && rm -rf ./playwright-profile && docker compose start playwright`
-- 备份登录态：停掉 `playwright` 后打包 `./playwright-profile`；该目录含有效 cookie，注意不要提交到 git
+- 重置浏览器登录态（清 cookie）：`docker compose stop playwright && rm -rf ./playwright-default && docker compose start playwright`
+- 备份登录态：停掉 `playwright` 后打包 `./playwright-default`；该目录含有效 cookie，注意不要提交到 git
 - 修改 `opencode-config` 后重启 `multica` 生效；重启会中断正在运行的任务。
